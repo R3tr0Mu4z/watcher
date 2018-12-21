@@ -10,18 +10,38 @@ import {
 } from 'react-native';
 import { WebBrowser } from 'expo';
 import { Button } from 'react-native-elements'
-
 import { MonoText } from '../components/StyledText';
+import socketIOClient from 'socket.io-client'
+const endpoint = 'http://192.168.0.110:5000';
+const socket = socketIOClient(endpoint)
+
 
 export default class HomeScreen extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      color: 'white'
+    };
+  }
+  send = () => {
+    var body = {};
+    body.asd = "asd";
+    body.def = "def";
+    console.log('testingggggggggggggggggg');
+    socket.emit('yo', body) // change 'red' to this.state.color
+  }
   static navigationOptions = {
     header: null,
   };
 
   render() {
+    socket.on('yo', (col) => {
+      console.log(col);
+    })
     return (
       <View style={styles.container}>
       <Button
+      onPress={() => this.send() }
   title='BUTTON' />
       </View>
     );
