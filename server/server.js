@@ -10,14 +10,13 @@ var mongoose = require('mongoose');
 var db = mongoose.connect('mongodb://localhost/realtime-tracker');
 var Phone = require('./models/phone');
 var Account = require('./models/account');
-var Collection = require('./models/collection');
+var Location = require('./models/location');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 
 app.post('/phone', function(request, response) {
     var phone = new Phone();
-    console.log(request.body);
     phone.name = request.body.name;
     phone.email = request.body.email;
     phone.save(function(err, savedPhone) {
@@ -28,7 +27,55 @@ app.post('/phone', function(request, response) {
        }
     });
 });
+//5c1d67655d55185002810e7c
+app.post('/account', function(request, response) {
+    var account = new Account();
+    account.email = request.body.email;
+    account.password = request.body.password;
+    account.save(function(err, savedAccount) {
+       if (err) {
+           response.status(500).send({error:"Could not save product"});
+       } else {
+           response.send(savedAccount);
+       }
+    });
+});
+//5c1d66d65d55185002810e7b
+// app.post('/phone', function(request, response) {
+//     var phone = new Account();
+//     phone.name = request.body.name;
+//     phone.save(function(err, savedPhone) {
+//        if (err) {
+//            response.status(500).send({error:"Could not save product"});
+//        } else {
+//            response.send(savedPhone);
+//        }
+//     });
+// });
 
+app.put('/account/phone/add', function(request, response) {
+   Phone.findOne({_id: request.body.phoneID}, function(err, phone) {
+      // console.log(phone);
+       if (err) {
+           response.status(500).send(err);
+       } else {
+           Account.updateMany({_id:request.body.accountID}, {$addToSet:{phones: phone._id}}, function(err, account) {
+              console.log(account);
+               if (err) {
+                   response.status(500).send({error:"Could not add item to wishlist"});
+               } else {
+                 response.send('success');
+               }
+           });
+       }
+   })
+});
+
+app.put('/account/check', function(request, response) {
+   Account.findOne({_id: request.body.accountID}, function(err, account) {
+     response.send(account);
+   })
+});
 io.on('connection', socket => {
   console.log('New client connected')
 
