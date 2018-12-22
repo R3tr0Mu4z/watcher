@@ -15,39 +15,16 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 
-app.post('/phone', function(request, response) {
+app.put('/account/phone/add', function(request, response) {
     var phone = new Phone();
     phone.name = request.body.name;
     phone.email = request.body.email;
+    console.log(request.body);
     phone.save(function(err, savedPhone) {
        if (err) {
            response.status(500).send({error:"Could not save product"});
        } else {
-           response.send(savedPhone);
-       }
-    });
-});
-//5c1d67655d55185002810e7c
-app.post('/account', function(request, response) {
-    var account = new Account();
-    account.email = request.body.email;
-    account.password = request.body.password;
-    account.save(function(err, savedAccount) {
-       if (err) {
-           response.status(500).send({error:"Could not save product"});
-       } else {
-           response.send(savedAccount);
-       }
-    });
-});
-
-
-app.put('/account/phone/add', function(request, response) {
-   Phone.findOne({_id: request.body.phoneID}, function(err, phone) {
-      // console.log(phone);
-       if (err) {
-           response.status(500).send(err);
-       } else {
+          console.log(phone);
            Account.updateMany({_id:request.body.accountID}, {$addToSet:{phones: phone._id}}, function(err, account) {
               console.log(account);
                if (err) {
@@ -57,35 +34,48 @@ app.put('/account/phone/add', function(request, response) {
                }
            });
        }
-   })
+    });
 });
-
+//5c1d67655d55185002810e7c
 app.put('/phone/location/add', function(request, response) {
-   Phone.findOne({_id: request.body.phoneID}, function(err, phone) {
-     if (err)
-     response.send(err)
-     else
-     var location = new Location();
-     location.lat = request.body.lat;
-     location.long = request.body.long;
-     Phone.updateMany({_id:request.body.phoneID}, {$addToSet:{locations: location._id}}, function(err, location) {
-         if (err) {
-             response.status(500).send({error:"Could not add item to wishlist"});
-         } else {
-           response.send(phone);
-         }
-     });
-   })
+    var location = new Location();
+    location.lat = request.body.lat;
+    location.long = request.body.long;
+    console.log(location);
+    location.save(function(err, savedLocation) {
+       if (err) {
+           response.status(500).send({error:"Could not save product"});
+       } else {
+          // console.log(phone);
+           Phone.updateMany({_id:request.body.phoneID}, {$addToSet:{locations: location._id}}, function(err, location) {
+              console.log(location);
+               if (err) {
+                   response.status(500).send({error:"Fail"});
+               } else {
+                 response.send('Success');
+               }
+           });
+       }
+    });
 });
 
-app.put('/account/check', function(request, response) {
+
+
+app.get('/account/check', function(request, response) {
    Account.findOne({_id: request.body.accountID}, function(err, account) {
      response.send(account);
    })
 });
-app.put('/location/check', function(request, response) {
-   Location.findOne({_id: request.body.locationID}, function(err, locations) {
-     response.send(locations);
+
+app.get('/phone/check', function(request, response) {
+   Phone.findOne({_id: request.body.phoneID}, function(err, phone) {
+     response.send(phone);
+   })
+});
+
+app.get('/location/check', function(request, response) {
+   Location.findOne({_id: request.body.locationID}, function(err, location) {
+     response.send(location);
    })
 });
 

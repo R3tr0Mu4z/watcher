@@ -4,6 +4,7 @@ var ObjectId = mongoose.Schema.Types.ObjectId;
 
 var phone = new Schema({
     title: {type: String, default: "Phone Name"},
+    email: String,
     locations:[{type: ObjectId, ref:'Location'}]
 });
 
