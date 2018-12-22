@@ -40,18 +40,7 @@ app.post('/account', function(request, response) {
        }
     });
 });
-//5c1d66d65d55185002810e7b
-// app.post('/phone', function(request, response) {
-//     var phone = new Account();
-//     phone.name = request.body.name;
-//     phone.save(function(err, savedPhone) {
-//        if (err) {
-//            response.status(500).send({error:"Could not save product"});
-//        } else {
-//            response.send(savedPhone);
-//        }
-//     });
-// });
+
 
 app.put('/account/phone/add', function(request, response) {
    Phone.findOne({_id: request.body.phoneID}, function(err, phone) {
@@ -68,6 +57,24 @@ app.put('/account/phone/add', function(request, response) {
                }
            });
        }
+   })
+});
+
+app.post('/phone/location/add', function(request, response) {
+   Phone.findOne({_id: request.body.phoneID}, function(err, phone) {
+     if (err)
+     response.send(err)
+     else
+     var location = new Location();
+     location.lat = request.body.lat;
+     location.long = request.body.long;
+     Phone.updateMany({_id:request.body.phoneID}, {$addToSet:{locations: location}}, function(err, location) {
+         if (err) {
+             response.status(500).send({error:"Could not add item to wishlist"});
+         } else {
+           response.send(phone);
+         }
+     });
    })
 });
 

@@ -1,8 +1,9 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var ObjectId = mongoose.Schema.Types.ObjectId;
 
 var location = new Schema({
-    name: String,
+    id: ObjectId,
     lat: Number,
     long: Number
 });
