@@ -21,23 +21,49 @@ export default class HomeScreen extends React.Component {
     super();
     this.state = {
       email: '',
-      password: ''
+      password: '',
+      accountID: '',
+      auth: '',
+      phonename: '',
+      phoneID: ''
     };
   }
-  send = () => {
-    console.log(this.state, 'state')
+  signup = () => {
     var auth = {};
     auth.email = this.state.email;
     auth.password = this.state.password;
-    socket.emit('signup', auth) // change 'red' to this.state.color
+    socket.emit('signup', auth)
+  }
+  phone = () => {
+    var addphone = {};
+    addphone.accountID = this.state.accountID;
+    addphone.email = this.state.email;
+    addphone.name = this.state.phonename;
+    socket.emit('phone', addphone)
+  }
+  locations = () => {
+    var addlocation = {};
+    addlocation.phoneID = this.state.phoneID;
+    addlocation.lat = 123;
+    addlocation.long = 789;
+    socket.emit('location', addlocation)
   }
   static navigationOptions = {
     header: null,
   };
 
   render() {
-    socket.on('yo', (col) => {
-      console.log(col);
+    socket.on('signup', (savedAccount) => {
+      this.setState({accountID : savedAccount._id})
+      console.log(this.state, 'signup state')
+    })
+    socket.on('phone', (savedPhone) => {
+      this.setState({phoneID : savedPhone._id})
+      console.log(this.state, 'phone  state')
+    })
+    socket.on('location', (location) => {
+      this.setState({phoneID : savedPhone._id})
+      console.log(this.state, 'phone  state')
     })
     return (
       <View style={styles.container}>
@@ -47,8 +73,18 @@ export default class HomeScreen extends React.Component {
       <FormInput onChangeText={(password) => this.setState({password})}/>
       <FormValidationMessage>Error message</FormValidationMessage>
       <Button
-      onPress={() => this.send() }
-  title='BUTTON' />
+      onPress={() => this.signup() }
+  title='SIGNUP' />
+
+    <FormLabel>Phone Name</FormLabel>
+    <FormInput onChangeText={(phonename) => this.setState({phonename})}/>
+    <FormValidationMessage>Error message</FormValidationMessage>
+    <Button
+    onPress={() => this.phone() }
+  title='ADD PHONE' />
+  <Button
+  onPress={() => this.locations() }
+  title='ADD LOCATION' />
       </View>
     );
   }

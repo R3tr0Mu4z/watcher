@@ -114,10 +114,64 @@ socket.on('signup', (auth) => {
          socket.emit('signup', 'Signup failed')
      } else {
          console.log(savedAccount)
-         socket.emit('signup', auth)
+         socket.emit('signup', savedAccount)
      }
   });
 })
+
+socket.on('phone', (addphone) => {
+  var phone = new Phone();
+  phone.name = addphone.name;
+  phone.email = addphone.email;
+  phone.accountID = addphone.accountID;
+  // console.log(request.body);
+  phone.save(function(err, savedPhone) {
+     if (err) {
+     } else {
+        // console.log(phone);
+         Account.updateMany({_id:phone.accountID}, {$addToSet:{phones: phone._id}}, function(err, account) {
+            // console.log(account);
+             if (err) {
+                 // response.status(500).send({error:"Could not add item to wishlist"});
+             } else {
+               console.log(savedPhone)
+               socket.emit('phone', savedPhone)
+             }
+         });
+     }
+  });
+})
+
+socket.on('location', (addlocation) => {
+  var location = new Location();
+  location.lat = addlocation.lat;
+  location.long = addlocation.long;
+  console.log("U HERE");
+  location.save(function(err, savedLocation) {
+     if (err) {
+         // response.status(500).send({error:"Could not save product"});
+     } else {
+        // console.log(phone);
+         Phone.updateMany({_id:addlocation.phoneID}, {$addToSet:{locations: location._id}}, function(err, location) {
+            console.log(location);
+             if (err) {
+                 // response.status(500).send({error:"Fail"});
+             } else {
+               console.log(savedLocation)
+               socket.emit('phone', savedLocation)
+             }
+         });
+     }
+  });
+})
+
+// locations = () => {
+//   var addlocation = {};
+//   addlocation.phoneID = this.state.phoneID;
+//   addlocation.lat = 123;
+//   addlocation.long = 789;
+//   socket.emit('location', addlocation)
+// }
 
 socket.on('login', (auth) => {
   Account.findOne({email: auth.email, password: auth.password}, function(err, account) {
