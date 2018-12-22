@@ -60,7 +60,7 @@ app.put('/account/phone/add', function(request, response) {
    })
 });
 
-app.post('/phone/location/add', function(request, response) {
+app.put('/phone/location/add', function(request, response) {
    Phone.findOne({_id: request.body.phoneID}, function(err, phone) {
      if (err)
      response.send(err)
@@ -68,7 +68,7 @@ app.post('/phone/location/add', function(request, response) {
      var location = new Location();
      location.lat = request.body.lat;
      location.long = request.body.long;
-     Phone.updateMany({_id:request.body.phoneID}, {$addToSet:{locations: location}}, function(err, location) {
+     Phone.updateMany({_id:request.body.phoneID}, {$addToSet:{locations: location._id}}, function(err, location) {
          if (err) {
              response.status(500).send({error:"Could not add item to wishlist"});
          } else {
@@ -83,6 +83,12 @@ app.put('/account/check', function(request, response) {
      response.send(account);
    })
 });
+app.put('/location/check', function(request, response) {
+   Location.findOne({_id: request.body.locationID}, function(err, locations) {
+     response.send(locations);
+   })
+});
+
 io.on('connection', socket => {
   console.log('New client connected')
 
