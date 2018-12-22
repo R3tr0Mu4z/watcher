@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 import { WebBrowser } from 'expo';
-import { Button } from 'react-native-elements'
+import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
 import { MonoText } from '../components/StyledText';
 import socketIOClient from 'socket.io-client'
 const endpoint = 'http://192.168.0.110:5000';
@@ -20,15 +20,16 @@ export default class HomeScreen extends React.Component {
   constructor() {
     super();
     this.state = {
-      color: 'white'
+      email: '',
+      password: ''
     };
   }
   send = () => {
-    var body = {};
-    body.asd = "asd";
-    body.def = "def";
-    console.log('testingggggggggggggggggg');
-    socket.emit('yo', body) // change 'red' to this.state.color
+    console.log(this.state, 'state')
+    var auth = {};
+    auth.email = this.state.email;
+    auth.password = this.state.password;
+    socket.emit('signup', auth) // change 'red' to this.state.color
   }
   static navigationOptions = {
     header: null,
@@ -40,6 +41,11 @@ export default class HomeScreen extends React.Component {
     })
     return (
       <View style={styles.container}>
+      <FormLabel>Email</FormLabel>
+      <FormInput onChangeText={(email) => this.setState({email})}/>
+      <FormLabel>Password</FormLabel>
+      <FormInput onChangeText={(password) => this.setState({password})}/>
+      <FormValidationMessage>Error message</FormValidationMessage>
       <Button
       onPress={() => this.send() }
   title='BUTTON' />

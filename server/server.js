@@ -15,6 +15,26 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 
+
+app.post('/account/signup', function(request, response) {
+    var account = new Account();
+    account.email = request.body.email;
+    account.password = request.body.password;
+    account.save(function(err, savedAccount) {
+       if (err) {
+           response.status(500).send({error:"Could not save product"});
+       } else {
+           response.send(savedAccount);
+       }
+    });
+});
+
+app.get('/account/login', function(request, response) {
+      Account.findOne({email: request.body.email, password: request.body.password}, function(err, account) {
+          response.send(account)
+      })
+});
+
 app.put('/account/phone/add', function(request, response) {
     var phone = new Phone();
     phone.name = request.body.name;
@@ -82,12 +102,28 @@ app.get('/location/check', function(request, response) {
 io.on('connection', socket => {
   console.log('New client connected')
 
-  socket.on('yo', (color) => {
-    console.log('Color Changed to: ', color)
-    console.log(socket.id);
-    socket.emit('yo', color)
-    // socket.to(socket.id).emit('yo', color);
+
+socket.on('signup', (auth) => {
+  var account = new Account();
+  console.log('you here');
+  account.email = auth.email;
+  account.password = auth.password;
+  account.save(function(err, savedAccount) {
+     if (err) {
+         console.log('fail')
+         socket.emit('signup', 'Signup failed')
+     } else {
+         console.log(savedAccount)
+         socket.emit('signup', auth)
+     }
+  });
+})
+
+socket.on('login', (auth) => {
+  Account.findOne({email: auth.email, password: auth.password}, function(err, account) {
+      console.log(account);
   })
+})
 
   // disconnect is fired when a client leaves the server
   socket.on('disconnect', () => {
