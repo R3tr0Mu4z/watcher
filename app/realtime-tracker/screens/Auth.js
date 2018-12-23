@@ -11,11 +11,12 @@ import {
 import { WebBrowser } from 'expo';
 import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
 import socketIOClient from 'socket.io-client'
+import { connect } from 'react-redux';
 const endpoint = 'http://192.168.0.110:5000';
 const socket = socketIOClient(endpoint)
 
 
-export default class Auth extends React.Component {
+class AuthScreen extends React.Component {
   constructor() {
     super();
     this.state = {
@@ -65,6 +66,11 @@ export default class Auth extends React.Component {
       this.setState({mess : resp.mess})
       console.log(resp, 'RESP')
       console.log(this.state, 'signup state')
+      var auth = resp.id;
+      this.props.signup(auth);
+      if (resp.id !== null) {
+        this.props.navigation.navigate('Phone')
+      }
     })
     socket.on('login', (resp) => {
       this.setState({accountID : resp.id})
@@ -87,20 +93,38 @@ export default class Auth extends React.Component {
       <FormInput onChangeText={(email) => this.setState({email})}/>
       <FormLabel>Password</FormLabel>
       <FormInput onChangeText={(password) => this.setState({password})}/>
-      <FormValidationMessage>{this.state.mess}</FormValidationMessage>
+      <FormValidationMessage>{this.props.accountID}</FormValidationMessage>
       <Button
       onPress={() => this.signup() }
   title='SIGNUP' />
   <Button
   onPress={() => this.login() }
 title='LOGIN' />
-
-
       </View>
     );
   }
 
 }
+
+function mapStateToProps(state) {
+    return {
+      email: state.email,
+      password: state.password,
+      accountID: state.accountID,
+      auth: state.auth,
+      mess: state.mess,
+      phonename: state.phonename,
+      phoneID: state.phoneID
+    }
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        signup: (auth) => dispatch({ type: 'AUTH_SIGNUP', id: auth }),
+    }
+}
+
+
 
 const styles = StyleSheet.create({
   container: {
@@ -109,3 +133,4 @@ const styles = StyleSheet.create({
     paddingTop: 100
   },
 });
+export default connect(mapStateToProps, mapDispatchToProps)(AuthScreen)
