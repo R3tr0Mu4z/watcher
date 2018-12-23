@@ -15,6 +15,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 
 
+function isEmptyObject(obj) {
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 app.post('/account/signup', function(request, response) {
     var account = new Account();
@@ -82,13 +90,20 @@ app.put('/phone/location/add', function(request, response) {
 
 
 app.get('/account/check', function(request, response) {
-   Account.findOne({_id: request.body.accountID}, function(err, account) {
+   Account.findOne({email: request.body.email}, function(err, account) {
+     if (isEmptyObject(account)) {
+       console.log('not found')
+       response.send('not found');
+     } else {
+    console.log('found')
      response.send(account);
+   }
    })
 });
 
 app.get('/phone/check', function(request, response) {
    Phone.findOne({_id: request.body.phoneID}, function(err, phone) {
+     console.log(phone, 'THIS IS UR PHONE')
      response.send(phone);
    })
 });
@@ -105,18 +120,32 @@ io.on('connection', socket => {
 
 socket.on('signup', (auth) => {
   var account = new Account();
+  var resp = {}
   console.log('you here');
   account.email = auth.email;
   account.password = auth.password;
-  account.save(function(err, savedAccount) {
-     if (err) {
-         console.log('fail')
-         socket.emit('signup', 'Signup failed')
-     } else {
-         console.log(savedAccount)
-         socket.emit('signup', savedAccount)
-     }
-  });
+  Account.findOne({email: account.email}, function(err, found) {
+    if (isEmptyObject(found)) {
+      account.save(function(err, savedAccount) {
+         if (err) {
+             console.log('fail')
+             socket.emit('signup', 'Signup failed')
+         } else {
+             console.log(savedAccount)
+             resp.id = savedAccount._id;
+             resp.auth = 1;
+             resp.mess = 'Account created';
+             socket.emit('signup', resp)
+         }
+      });
+    } else {
+    console.log('Email already exists')
+    resp.id = null;
+    resp.auth = null;
+    resp.mess = 'Email already exists';
+    socket.emit('signup', resp);
+  }
+  })
 })
 
 socket.on('phone', (addphone) => {
@@ -129,7 +158,7 @@ socket.on('phone', (addphone) => {
      if (err) {
      } else {
         // console.log(phone);
-         Account.updateMany({_id:phone.accountID}, {$addToSet:{phones: phone._id}}, function(err, account) {
+         Account.updateOne({_id:phone.accountID}, {$addToSet:{phones: phone._id}}, function(err, account) {
             // console.log(account);
              if (err) {
                  // response.status(500).send({error:"Could not add item to wishlist"});
@@ -152,7 +181,7 @@ socket.on('location', (addlocation) => {
          // response.status(500).send({error:"Could not save product"});
      } else {
         // console.log(phone);
-         Phone.updateMany({_id:addlocation.phoneID}, {$addToSet:{locations: location._id}}, function(err, location) {
+         Phone.updateOne({_id:addlocation.phoneID}, {$addToSet:{locations: location._id}}, function(err, location) {
             console.log(location);
              if (err) {
                  // response.status(500).send({error:"Fail"});
@@ -162,20 +191,30 @@ socket.on('location', (addlocation) => {
              }
          });
      }
-  });
+  }); 
 })
 
-// locations = () => {
-//   var addlocation = {};
-//   addlocation.phoneID = this.state.phoneID;
-//   addlocation.lat = 123;
-//   addlocation.long = 789;
-//   socket.emit('location', addlocation)
-// }
 
 socket.on('login', (auth) => {
-  Account.findOne({email: auth.email, password: auth.password}, function(err, account) {
-      console.log(account);
+  var account = new Account();
+  var resp = {}
+  console.log('you here');
+  account.email = auth.email;
+  account.password = auth.password;
+  Account.findOne({email: account.email, password: account.password}, function(err, found) {
+    console.log()
+    if (isEmptyObject(found)) {
+      resp.id = null;
+      resp.auth = null;
+      resp.mess = 'Email or password is incorrect';
+      socket.emit('login', resp);
+    } else {
+    console.log('Success')
+    resp.id = found._id;
+    resp.auth = 1;
+    resp.mess = 'Success';
+    socket.emit('login', resp);
+  }
   })
 })
 
