@@ -150,8 +150,7 @@ socket.on('signup', (auth) => {
 
 socket.on('phone', (addphone) => {
   var phone = new Phone();
-  phone.name = addphone.name;
-  phone.email = addphone.email;
+  phone.title = addphone.name;
   phone.accountID = addphone.accountID;
   // console.log(request.body);
   phone.save(function(err, savedPhone) {
@@ -191,7 +190,7 @@ socket.on('location', (addlocation) => {
              }
          });
      }
-  }); 
+  });
 })
 
 

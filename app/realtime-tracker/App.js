@@ -23,8 +23,9 @@ const initialState = {
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case 'AUTH_SIGNUP':
-            console.log(action)
             return { auth: action.mess, accountID: action.id }
+        case 'ADD_PHONE':
+            return { phonename: action.phone.name, phoneID: action.phone.id }
     }
     return state
 }

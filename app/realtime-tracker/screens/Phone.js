@@ -16,15 +16,39 @@ const endpoint = 'http://192.168.0.110:5000';
 const socket = socketIOClient(endpoint)
 
 class PhoneScreen extends Component {
-
+    constructor() {
+      super();
+      this.state = {
+        phonename: null
+      };
+    }
     static navigationOptions = {
         header: null
     }
 
+    phone = () => {
+      var addphone = {};
+      addphone.accountID = this.props.accountID;
+      addphone.name = this.state.phonename;
+      socket.emit('phone', addphone)
+    }
+
     render() {
+      socket.on('phone', (resp) => {
+        var phone = {};
+        phone.name = resp.title;
+        phone.id = resp._id;
+        console.log(phone, 'PHOEN DATEALS')
+        this.props.addphone(phone);
+      })
         return (
             <View>
-              <Text>{this.props.accountID}</Text>
+            <FormLabel>Phone Name</FormLabel>
+            <FormInput onChangeText={(phonename) => this.setState({phonename})}/>
+            <FormValidationMessage>{this.props.phoneID}</FormValidationMessage>
+            <Button
+            onPress={() => this.phone() }
+          title='SAVE' />
             </View>
         );
     }
@@ -44,7 +68,7 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
     return {
-        signup: (auth) => dispatch({ type: 'AUTH_SIGNUP', id: auth }),
+        addphone: (phone) => dispatch({ type: 'ADD_PHONE', phone: phone }),
     }
 }
 
