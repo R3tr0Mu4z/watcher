@@ -24,6 +24,10 @@ function isEmptyObject(obj) {
   return true;
 }
 
+function emailregex(email) {
+  var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+}
 app.post('/account/signup', function(request, response) {
     var account = new Account();
     account.email = request.body.email;
@@ -91,12 +95,16 @@ app.put('/phone/location/add', function(request, response) {
 
 app.get('/account/check', function(request, response) {
    Account.findOne({email: request.body.email}, function(err, account) {
-     if (isEmptyObject(account)) {
-       console.log('not found')
-       response.send('not found');
-     } else {
-    console.log('found')
-     response.send(account);
+     if (emailregex(request.body.email)){
+       if (isEmptyObject(account)) {
+         console.log('not found')
+         response.send('not found');
+       } else {
+      console.log('found')
+       response.send(account);
+     }
+   } else {
+     response.send('email is invalid')
    }
    })
 });
@@ -124,6 +132,7 @@ socket.on('signup', (auth) => {
   console.log('you here');
   account.email = auth.email;
   account.password = auth.password;
+  if (emailregex(account.email)) {
   Account.findOne({email: account.email}, function(err, found) {
     if (isEmptyObject(found)) {
       account.save(function(err, savedAccount) {
@@ -146,6 +155,17 @@ socket.on('signup', (auth) => {
     socket.emit('signup', resp);
   }
   })
+} else if (account.email == null || account.password == null) {
+    resp.id = null;
+    resp.auth = null;
+    resp.mess = 'Please enter email and password';
+    socket.emit('signup', resp)
+} else {
+  resp.id = null;
+  resp.auth = null;
+  resp.mess = 'Invalid Email';
+  socket.emit('signup', resp)
+}
 })
 
 socket.on('phone', (addphone) => {
@@ -174,6 +194,9 @@ socket.on('location', (addlocation) => {
   var location = new Location();
   location.lat = addlocation.lat;
   location.long = addlocation.long;
+  location.speed = addlocation.speed;
+  location.timestamp = addlocation.timestamp;
+  location.status = addlocation.status;
   console.log("U HERE");
   location.save(function(err, savedLocation) {
      if (err) {
@@ -197,24 +220,29 @@ socket.on('location', (addlocation) => {
 socket.on('login', (auth) => {
   var account = new Account();
   var resp = {}
-  console.log('you here');
   account.email = auth.email;
   account.password = auth.password;
+  if (emailregex(account.email)) {
   Account.findOne({email: account.email, password: account.password}, function(err, found) {
     console.log()
     if (isEmptyObject(found)) {
-      resp.id = null;
-      resp.auth = null;
       resp.mess = 'Email or password is incorrect';
       socket.emit('login', resp);
     } else {
-    console.log('Success')
-    resp.id = found._id;
-    resp.auth = 1;
-    resp.mess = 'Success';
+      console.log('Success')
+      resp.id = found._id;
+      resp.auth = 1;
+      resp.mess = 'Success';
+      socket.emit('login', resp);
+    }
+    })
+    } else if (account.email == null || account.password == null) {
+      resp.mess = 'Please enter email and password';
+      socket.emit('login', resp);
+    } else {
+    resp.mess = 'Invalid Email';
     socket.emit('login', resp);
   }
-  })
 })
 
   // disconnect is fired when a client leaves the server

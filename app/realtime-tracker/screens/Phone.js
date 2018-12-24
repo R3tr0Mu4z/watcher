@@ -19,7 +19,8 @@ class PhoneScreen extends Component {
     constructor() {
       super();
       this.state = {
-        phonename: null
+        phonename: null,
+        phoneID: null
       };
     }
     static navigationOptions = {
@@ -41,6 +42,7 @@ class PhoneScreen extends Component {
         console.log(phone, 'PHOEN DATEALS')
         this.props.addphone(phone);
       })
+      if (this.props.phoneID == null) {
         return (
             <View>
             <FormLabel>Phone Name</FormLabel>
@@ -51,16 +53,18 @@ class PhoneScreen extends Component {
           title='SAVE' />
             </View>
         );
+      } else {
+        return (
+          <View>
+            {this.props.navigation.navigate('Main')}
+          </View>
+        )
+      }
     }
 }
 
 function mapStateToProps(state) {
     return {
-      email: state.email,
-      password: state.password,
-      accountID: state.accountID,
-      auth: state.auth,
-      mess: state.mess,
       phonename: state.phonename,
       phoneID: state.phoneID
     }

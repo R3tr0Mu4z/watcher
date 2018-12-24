@@ -1,13 +1,19 @@
 {
   "expo": {
-    "name": "realtime-tracker",
-    "slug": "realtime-tracker",
+    "name": "Watcher - Desktop to Android/iOS Phone Tracker",
+    "slug": "watcher",
     "privacy": "public",
     "sdkVersion": "31.0.0",
     "platforms": [
       "ios",
       "android"
     ],
+    "ios": {
+      "bundleIdentifier": "tech.r3tr0.watcher"
+    },
+    "android": {
+      "package": "tech.r3tr0.watcher"
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

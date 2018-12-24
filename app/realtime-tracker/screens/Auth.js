@@ -8,25 +8,23 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { WebBrowser } from 'expo';
+import Expo from 'expo';
 import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
 import socketIOClient from 'socket.io-client'
 import { connect } from 'react-redux';
 const endpoint = 'http://192.168.0.110:5000';
 const socket = socketIOClient(endpoint)
 
-
 class AuthScreen extends React.Component {
+
   constructor() {
     super();
     this.state = {
-      email: '',
-      password: '',
-      accountID: '',
+      email: null,
+      password: null,
+      accountID: null,
       auth: '',
-      mess: '',
-      phonename: '',
-      phoneID: ''
+      mess: ''
     };
   }
   signup = () => {
@@ -64,8 +62,6 @@ class AuthScreen extends React.Component {
       this.setState({accountID : resp.id})
       this.setState({auth : resp.auth})
       this.setState({mess : resp.mess})
-      console.log(resp, 'RESP')
-      console.log(this.state, 'signup state')
       var auth = resp.id;
       this.props.signup(auth);
       if (resp.id !== null) {
@@ -87,21 +83,30 @@ class AuthScreen extends React.Component {
       this.setState({phoneID : savedPhone._id})
       console.log(this.state, 'phone  state')
     })
+    if (this.props.accountID == null) {
     return (
       <View style={styles.container}>
       <FormLabel>Email</FormLabel>
       <FormInput onChangeText={(email) => this.setState({email})}/>
       <FormLabel>Password</FormLabel>
       <FormInput onChangeText={(password) => this.setState({password})}/>
-      <FormValidationMessage>{this.props.accountID}</FormValidationMessage>
+      <FormValidationMessage>{this.state.mess}</FormValidationMessage>
       <Button
       onPress={() => this.signup() }
   title='SIGNUP' />
   <Button
-  onPress={() => this.login() }
+  onPress={() => this.getToken() }
 title='LOGIN' />
       </View>
     );
+  } else {
+
+      return (
+        <View>
+        {this.props.navigation.navigate('Phone')}
+        </View>
+      );
+  }
   }
 
 }
@@ -112,9 +117,7 @@ function mapStateToProps(state) {
       password: state.password,
       accountID: state.accountID,
       auth: state.auth,
-      mess: state.mess,
-      phonename: state.phonename,
-      phoneID: state.phoneID
+      mess: state.mess
     }
 }
 

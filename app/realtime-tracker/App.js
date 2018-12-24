@@ -2,21 +2,24 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import AuthScreen from './screens/Auth';
 import PhoneScreen from './screens/Phone';
+import MainScreen from './screens/Main';
 import { createStore } from 'redux';
+import { persistStore, persistReducer } from 'redux-persist'
 import { Provider } from 'react-redux';
 import socketIOClient from 'socket.io-client'
 import { createStackNavigator } from 'react-navigation'
+import storage from 'redux-persist/lib/storage'
 const endpoint = 'http://192.168.0.110:5000';
 const socket = socketIOClient(endpoint)
 
 const initialState = {
   email: '',
   password: '',
-  accountID: '',
+  accountID: null,
   auth: '',
   mess: '',
-  phonename: '',
-  phoneID: ''
+  phonename: null,
+  phoneID: null
 }
 
 
@@ -25,12 +28,20 @@ const reducer = (state = initialState, action) => {
         case 'AUTH_SIGNUP':
             return { auth: action.mess, accountID: action.id }
         case 'ADD_PHONE':
-            return { phonename: action.phone.name, phoneID: action.phone.id }
+            console.log(state, 'MAIN APP JS STATE')
+            return { accountID: state.accountID, phonename: action.phone.name, phoneID: action.phone.id }
     }
     return state
 }
+const persistConfig = {
+  key: 'root',
+  storage,
+}
 
-const store = createStore(reducer);
+const persistedReducer = persistReducer(persistConfig, reducer)
+
+let store = createStore(persistedReducer);
+let persistor = persistStore(store)
 
 
 class App extends React.Component {
@@ -45,7 +56,8 @@ class App extends React.Component {
 
 const AppStackNavigator = createStackNavigator({
   Home: AuthScreen,
-  Phone: PhoneScreen
+  Phone: PhoneScreen,
+  Main: MainScreen
 
 })
 
