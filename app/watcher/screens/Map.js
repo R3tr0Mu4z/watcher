@@ -24,12 +24,8 @@ class MapScreen extends Component {
     constructor() {
       super();
       this.state = {
-        coords: [{ latitude: 37.8025259, longitude: -122.4351431 },
-        { latitude: 37.7896386, longitude: -122.421646 },
-        { latitude: 37.7665248, longitude: -122.4161628 },
-        { latitude: 37.7734153, longitude: -122.4577787 },
-        { latitude: 37.7948605, longitude: -122.4596065 },
-        { latitude: 37.8025259, longitude: -122.4351431 }]
+        coordinates: [],
+        markers: []
       };
     }
     static navigationOptions = {
@@ -49,8 +45,8 @@ class MapScreen extends Component {
 
     render() {
       socket.on('coordinates', (coordinates, markers) => {
-        console.log(coordinates)
-        console.log(markers)
+        this.setState({coordinates: coordinates});
+        this.setState({markers: markers});
         // this.getCoordinates();
       })
         return (
@@ -66,22 +62,34 @@ class MapScreen extends Component {
           longitudeDelta: 0.0421,
           }}>
 
+          {this.state.markers.map((marker, index) => {
+             const coords = {
+                 latitude: marker.latitude,
+                 longitude: marker.longitude,
+             };
+
+             return (
+                 <MapView.Marker
+                    key={index}
+                    coordinate={coords}
+                 />
+             );
+          })}
+
+
           <MapView.Polyline
-          coordinates={this.state.coords}
-          strokeColor="#000"
-          strokeColors={[
-          '#7F0000',
-          '#00000000',
-          '#B24112',
-          '#E5845C',
-          '#238C23',
-          '#7F0000'
-          ]}
-          strokeWidth={2}
-          lineCap={'round'}
-
-          />
-
+        		coordinates={this.state.coordinates}
+        		strokeColor="#000" // fallback for when `strokeColors` is not supported by the map-provider
+        		strokeColors={[
+        			'#7F0000',
+        			'#00000000', // no color, creates a "long" gradient between the previous and next coordinate
+        			'#B24112',
+        			'#E5845C',
+        			'#238C23',
+        			'#7F0000'
+        		]}
+        		strokeWidth={6}
+        	/>
           </MapView>
 
         );
