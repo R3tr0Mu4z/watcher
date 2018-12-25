@@ -3,11 +3,13 @@ import { StyleSheet, Text, View } from 'react-native';
 import AuthScreen from './screens/Auth';
 import PhoneScreen from './screens/Phone';
 import MainScreen from './screens/Main';
+import TrackScreen from './screens/Track';
+import MapScreen from './screens/Map';
 import { createStore } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist'
 import { Provider } from 'react-redux';
 import socketIOClient from 'socket.io-client'
-import { createStackNavigator } from 'react-navigation'
+import { createStackNavigator, createBottomTabNavigator } from 'react-navigation'
 import storage from 'redux-persist/lib/storage'
 const endpoint = 'http://192.168.0.110:5000';
 const socket = socketIOClient(endpoint)
@@ -57,7 +59,12 @@ class App extends React.Component {
 const AppStackNavigator = createStackNavigator({
   Home: AuthScreen,
   Phone: PhoneScreen,
-  Main: MainScreen
+  Main: {
+    screen: createBottomTabNavigator({
+      Track: TrackScreen,
+      Map: MapScreen
+    })
+  }
 
 })
 

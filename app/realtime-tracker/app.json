@@ -14,6 +14,9 @@
     "android": {
       "package": "tech.r3tr0.watcher"
     },
+    "config": {
+      "googleMaps": { "apiKey": "AIzaSyCtQ0ZNYHhmXDHmJooYSUOzxxRad7TUPRg" }   
+    },
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

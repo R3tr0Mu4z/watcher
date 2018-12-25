@@ -8,7 +8,7 @@ var location = new Schema({
     long: Number,
     speed: Number,
     timestamp: Number,
-    Status: String
+    status: String
 });
 
 module.exports = mongoose.model('Location', location);

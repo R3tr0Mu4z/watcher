@@ -122,6 +122,14 @@ app.get('/location/check', function(request, response) {
    })
 });
 
+app.get('/phone/locations', function(request, response) {
+  var id = request.body.phoneID;
+  (async () => {
+    var coords = await getCoords(id);
+    console.log(coords)
+  })();
+});
+
 io.on('connection', socket => {
   console.log('New client connected')
 
@@ -203,7 +211,7 @@ socket.on('location', (addlocation) => {
          // response.status(500).send({error:"Could not save product"});
      } else {
         // console.log(phone);
-         Phone.updateOne({_id:addlocation.phoneID}, {$addToSet:{locations: location._id}}, function(err, location) {
+         Phone.updateOne({_id:addlocation.phoneID}, {$push:{locations: location._id}}, function(err, location) {
             console.log(location);
              if (err) {
                  // response.status(500).send({error:"Fail"});
@@ -250,5 +258,25 @@ socket.on('login', (auth) => {
     console.log('user disconnected')
   })
 })
+async function getCoords(id) {
+   Phone.findOne({_id: id}, async function(err, phone) {
+    var locations = phone.locations;
+    var coords =  await getLocDetails(locations);
+    console.log(coords);
+  })
+}
+
+async function getLocDetails(locations) {
+  var coords = [];
+  for (var i = 0; i <= locations.length-1; i++) {
+    var coord = {}
+    await Location.findOne({_id: locations[i]}, function(err, loc) {
+      coord['latitude'] = loc.lat;
+      coord['longitude'] = loc.long;
+      coords.push(coord);
+    })
+  }
+  return coords;
+}
 
 server.listen(port, () => console.log(`Listening on port ${port}`))
