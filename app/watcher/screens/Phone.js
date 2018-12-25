@@ -34,6 +34,11 @@ class PhoneScreen extends Component {
       socket.emit('phone', addphone)
     }
 
+    hasphone = () => {
+      socket.disconnect();
+      this.props.navigation.navigate('Main');
+    }
+
     render() {
       socket.on('phone', (resp) => {
         var phone = {};
@@ -56,7 +61,7 @@ class PhoneScreen extends Component {
       } else {
         return (
           <View>
-            {this.props.navigation.navigate('Main')}
+            {this.hasphone()}
           </View>
         )
       }

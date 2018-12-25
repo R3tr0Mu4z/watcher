@@ -28,6 +28,7 @@ function emailregex(email) {
   var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
 }
+
 app.post('/account/signup', function(request, response) {
     var account = new Account();
     account.email = request.body.email;
@@ -126,18 +127,54 @@ app.get('/phone/locations', function(request, response) {
   var id = request.body.phoneID;
   (async () => {
     var coords = await getCoords(id);
-    console.log(coords)
+    response.send('request received')
   })();
+
 });
+
+
 
 io.on('connection', socket => {
   console.log('New client connected')
+
+socket.on('coordinates', (phoneid) => {
+  var id = phoneid;
+  console.log('you here');
+  (async () => {
+    var coords = await getCoords(id, socket);
+    response.send('request received')
+  })();
+})
+
+socket.on('coordinates', (phoneid) => {
+  console.log('you here')
+  var id = phoneid;
+  console.log('you here');
+  (async () => {
+    var coords = [];
+    await Phone.findOne({_id: id}, async function(err, phone) {
+     var locations = phone.locations;
+     for (var i = 0; i <= locations.length-1; i++) {
+       var coord = {}
+       await Location.findOne({_id: locations[i]}, async function(err, loc) {
+         coord['latitude'] = loc.lat;
+         coord['longitude'] = loc.long;
+         coords.push(coord);
+       })
+     }
+     console.log(coords, 'Emitting these')
+     socket.emit('coordinates', coords);
+   })
+  })();
+})
+
+
 
 
 socket.on('signup', (auth) => {
   var account = new Account();
   var resp = {}
-  console.log('you here');
+  console.log('you here asdasd');
   account.email = auth.email;
   account.password = auth.password;
   if (emailregex(account.email)) {
@@ -253,30 +290,26 @@ socket.on('login', (auth) => {
   }
 })
 
-  // disconnect is fired when a client leaves the server
   socket.on('disconnect', () => {
     console.log('user disconnected')
   })
 })
-async function getCoords(id) {
-   Phone.findOne({_id: id}, async function(err, phone) {
-    var locations = phone.locations;
-    var coords =  await getLocDetails(locations);
-    console.log(coords);
-  })
-}
 
-async function getLocDetails(locations) {
-  var coords = [];
-  for (var i = 0; i <= locations.length-1; i++) {
-    var coord = {}
-    await Location.findOne({_id: locations[i]}, function(err, loc) {
-      coord['latitude'] = loc.lat;
-      coord['longitude'] = loc.long;
-      coords.push(coord);
-    })
-  }
-  return coords;
+async function getCoords(id) {
+   var coords = [];
+   await Phone.findOne({_id: id}, async function(err, phone) {
+    var locations = phone.locations;
+    for (var i = 0; i <= locations.length-1; i++) {
+      var coord = {}
+      await Location.findOne({_id: locations[i]}, async function(err, loc) {
+        coord['latitude'] = loc.lat;
+        coord['longitude'] = loc.long;
+        coords.push(coord);
+      })
+    }
+    console.log(coords, 'Emitting these')
+    socket.emit('coordinates', coords);
+  })
 }
 
 server.listen(port, () => console.log(`Listening on port ${port}`))

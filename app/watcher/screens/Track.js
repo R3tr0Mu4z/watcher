@@ -72,7 +72,7 @@ class TrackScreen extends Component {
       addlocation.timestamp = this.state.timestamp;
       addlocation.status = this.state.status;
       socket.emit('location', addlocation)
-      this.getLocation();
+      // this.getLocation();
     }
 
     render() {

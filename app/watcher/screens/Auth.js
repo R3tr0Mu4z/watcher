@@ -39,20 +39,11 @@ class AuthScreen extends React.Component {
     auth.password = this.state.password;
     socket.emit('login', auth)
   }
-  phone = () => {
-    var addphone = {};
-    addphone.accountID = this.state.accountID;
-    addphone.email = this.state.email;
-    addphone.name = this.state.phonename;
-    socket.emit('phone', addphone)
+  authorized = () => {
+    socket.disconnect();
+    this.props.navigation.navigate('Phone');
   }
-  locations = () => {
-    var addlocation = {};
-    addlocation.phoneID = this.state.phoneID;
-    addlocation.lat = 123;
-    addlocation.long = 789;
-    socket.emit('location', addlocation)
-  }
+
   static navigationOptions = {
     header: null,
   };
@@ -75,14 +66,7 @@ class AuthScreen extends React.Component {
       console.log(resp, 'RESP')
       console.log(this.state, 'login state')
     })
-    socket.on('phone', (savedPhone) => {
-      this.setState({phoneID : savedPhone._id})
-      console.log(this.state, 'phone  state')
-    })
-    socket.on('location', (location) => {
-      this.setState({phoneID : savedPhone._id})
-      console.log(this.state, 'phone  state')
-    })
+
     if (this.props.accountID == null) {
     return (
       <View style={styles.container}>
@@ -95,7 +79,7 @@ class AuthScreen extends React.Component {
       onPress={() => this.signup() }
   title='SIGNUP' />
   <Button
-  onPress={() => this.getToken() }
+  onPress={() => this.login() }
 title='LOGIN' />
       </View>
     );
@@ -103,7 +87,7 @@ title='LOGIN' />
 
       return (
         <View>
-        {this.props.navigation.navigate('Phone')}
+        {this.authorized()}
         </View>
       );
   }

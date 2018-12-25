@@ -8,11 +8,8 @@ import MapScreen from './screens/Map';
 import { createStore } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist'
 import { Provider } from 'react-redux';
-import socketIOClient from 'socket.io-client'
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation'
 import storage from 'redux-persist/lib/storage'
-const endpoint = 'http://192.168.0.110:5000';
-const socket = socketIOClient(endpoint)
 
 const initialState = {
   email: '',
@@ -20,8 +17,7 @@ const initialState = {
   accountID: null,
   auth: '',
   mess: '',
-  phonename: null,
-  phoneID: null
+  phonename: null
 }
 
 
@@ -37,6 +33,7 @@ const reducer = (state = initialState, action) => {
 }
 const persistConfig = {
   key: 'root',
+  blacklist: 'socket',
   storage,
 }
 
@@ -67,7 +64,6 @@ const AppStackNavigator = createStackNavigator({
   }
 
 })
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
