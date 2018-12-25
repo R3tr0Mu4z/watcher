@@ -45,7 +45,7 @@ class TrackScreen extends Component {
     static navigationOptions = {
         header: null
     }
-    async getLocation() {
+    getLocation = () => {
       navigator.geolocation.getCurrentPosition(
        (position) => {
          console.log(position);
@@ -62,7 +62,7 @@ class TrackScreen extends Component {
      );
     }
 
-    async locations() {
+    locations = () => {
       console.log(this.props, 'PROPSSSSSSSSSSSS')
       var addlocation = {};
       addlocation.phoneID = this.props.phoneID;
@@ -72,7 +72,7 @@ class TrackScreen extends Component {
       addlocation.timestamp = this.state.timestamp;
       addlocation.status = this.state.status;
       socket.emit('location', addlocation)
-      // this.getLocation();
+      // this.getLocationn
     }
 
     render() {

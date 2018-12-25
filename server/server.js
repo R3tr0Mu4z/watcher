@@ -7,7 +7,7 @@ const server = http.createServer(app)
 const io = socketIO.listen(server)
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
-var db = mongoose.connect('mongodb://localhost/realtime-tracker');
+var db = mongoose.connect('mongodb://watcher:watcherpassE1@ds249092.mlab.com:49092/watcher');
 var Phone = require('./models/phone');
 var Account = require('./models/account');
 var Location = require('./models/location');
@@ -123,28 +123,13 @@ app.get('/location/check', function(request, response) {
    })
 });
 
-app.get('/phone/locations', function(request, response) {
-  var id = request.body.phoneID;
-  (async () => {
-    var coords = await getCoords(id);
-    response.send('request received')
-  })();
 
-});
 
 
 
 io.on('connection', socket => {
   console.log('New client connected')
 
-socket.on('coordinates', (phoneid) => {
-  var id = phoneid;
-  console.log('you here');
-  (async () => {
-    var coords = await getCoords(id, socket);
-    response.send('request received')
-  })();
-})
 
 socket.on('coordinates', (phoneid) => {
   console.log('you here')
@@ -152,18 +137,27 @@ socket.on('coordinates', (phoneid) => {
   console.log('you here');
   (async () => {
     var coords = [];
+    coords['coordinates'] = [];
+    coords['marker'] = [];
     await Phone.findOne({_id: id}, async function(err, phone) {
      var locations = phone.locations;
      for (var i = 0; i <= locations.length-1; i++) {
-       var coord = {}
+       var coord = {};
+       var marker = {};
        await Location.findOne({_id: locations[i]}, async function(err, loc) {
          coord['latitude'] = loc.lat;
          coord['longitude'] = loc.long;
-         coords.push(coord);
+         marker['latitude'] = loc.lat;
+         marker['longitude'] = loc.long;
+         marker['status'] = loc.status;
+         marker['time'] = loc.timestamp;
+         marker['speed'] = loc.speed;
+         coords['coordinates'].push(coord);
+         coords['marker'].push(marker);
        })
      }
-     console.log(coords, 'Emitting these')
-     socket.emit('coordinates', coords);
+     console.log(coords, 'DATATATATATA')
+     socket.emit('coordinates', coords.coordinates, coords.marker);
    })
   })();
 })
@@ -295,21 +289,30 @@ socket.on('login', (auth) => {
   })
 })
 
-async function getCoords(id) {
-   var coords = [];
-   await Phone.findOne({_id: id}, async function(err, phone) {
-    var locations = phone.locations;
-    for (var i = 0; i <= locations.length-1; i++) {
-      var coord = {}
-      await Location.findOne({_id: locations[i]}, async function(err, loc) {
-        coord['latitude'] = loc.lat;
-        coord['longitude'] = loc.long;
-        coords.push(coord);
-      })
-    }
-    console.log(coords, 'Emitting these')
-    socket.emit('coordinates', coords);
-  })
-}
+// async function getCoords(id) {
+//    var coords = [];
+//    coords['coordinates'] = [];
+//    coords['marker'] = [];
+//    await Phone.findOne({_id: id}, async function(err, phone) {
+//     var locations = phone.locations;
+//     for (var i = 0; i <= locations.length-1; i++) {
+//       var coord = {};
+//       var marker = {};
+//       await Location.findOne({_id: locations[i]}, async function(err, loc) {
+//         coord['latitude'] = loc.lat;
+//         coord['longitude'] = loc.long;
+//         marker['latitude'] = loc.lat;
+//         marker['longitude'] = loc.long;
+//         marker['status'] = loc.status;
+//         marker['time'] = loc.timestamp;
+//         marker['speed'] = loc.speed;
+//         coords['coordinates'].push(coord);
+//         coords['marker'].push(marker);
+//       })
+//     }
+//     console.log(coords, 'Emitting these')
+//     socket.emit('coordinates', coords);
+//   })
+// }
 
 server.listen(port, () => console.log(`Listening on port ${port}`))
