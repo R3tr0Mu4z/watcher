@@ -29,102 +29,42 @@ function emailregex(email) {
   return re.test(email);
 }
 
-app.post('/account/signup', function(request, response) {
-    var account = new Account();
-    account.email = request.body.email;
-    account.password = request.body.password;
-    account.save(function(err, savedAccount) {
-       if (err) {
-           response.status(500).send({error:"Could not save product"});
-       } else {
-           response.send(savedAccount);
-       }
-    });
+
+
+app.post('/push', function(request, response) {
+  console.log(request.body)
+  Account.updateOne({_id:request.body.accountID}, {token: request.body.token}, function(err, account) {
+    if (err) {
+      response.send(err)
+    } else {
+      response.send(account)
+    }
+  })
 });
 
-app.get('/account/login', function(request, response) {
-      Account.findOne({email: request.body.email, password: request.body.password}, function(err, account) {
-          response.send(account)
-      })
-});
-
-app.put('/account/phone/add', function(request, response) {
-    var phone = new Phone();
-    phone.name = request.body.name;
-    phone.email = request.body.email;
-    console.log(request.body);
-    phone.save(function(err, savedPhone) {
-       if (err) {
-           response.status(500).send({error:"Could not save product"});
-       } else {
-          console.log(phone);
-           Account.updateMany({_id:request.body.accountID}, {$addToSet:{phones: phone._id}}, function(err, account) {
-              console.log(account);
-               if (err) {
-                   response.status(500).send({error:"Could not add item to wishlist"});
-               } else {
-                 response.send('success');
-               }
-           });
-       }
-    });
-});
-//5c1d67655d55185002810e7c
-app.put('/phone/location/add', function(request, response) {
-    var location = new Location();
-    location.lat = request.body.lat;
-    location.long = request.body.long;
-    console.log(location);
-    location.save(function(err, savedLocation) {
-       if (err) {
-           response.status(500).send({error:"Could not save product"});
-       } else {
-          // console.log(phone);
-           Phone.updateMany({_id:request.body.phoneID}, {$addToSet:{locations: location._id}}, function(err, location) {
-              console.log(location);
-               if (err) {
-                   response.status(500).send({error:"Fail"});
-               } else {
-                 response.send('Success');
-               }
-           });
-       }
-    });
+app.get('/phone', function(request, response) {
+  Phone.findOne({_id: request.body.phoneID}, function(err, found) {
+    response.send(found)
+  })
 });
 
 
-
-app.get('/account/check', function(request, response) {
-   Account.findOne({email: request.body.email}, function(err, account) {
-     if (emailregex(request.body.email)){
-       if (isEmptyObject(account)) {
-         console.log('not found')
-         response.send('not found');
-       } else {
-      console.log('found')
-       response.send(account);
-     }
-   } else {
-     response.send('email is invalid')
-   }
-   })
-});
-
-app.get('/phone/check', function(request, response) {
-   Phone.findOne({_id: request.body.phoneID}, function(err, phone) {
-     console.log(phone, 'THIS IS UR PHONE')
-     response.send(phone);
-   })
-});
-
-app.get('/location/check', function(request, response) {
-   Location.findOne({_id: request.body.locationID}, function(err, location) {
-     response.send(location);
-   })
+app.get('/account', function(request, response) {
+  Account.findOne({main_phone: request.body.main_phone}, function(err, found) {
+    response.send(found)
+  })
 });
 
 
-
+app.post('/access', function(request, response) {
+  Account.updateOne({main_phone: request.body.main_phone}, {$addToSet:{requested_phones: request.body.accountID}}, function(err, account) {
+    if (err) {
+      response.send(err)
+    } else {
+      response.send(account)
+    }
+  })
+});
 
 
 io.on('connection', socket => {
@@ -132,7 +72,7 @@ io.on('connection', socket => {
 
 
 socket.on('coordinates', (phoneid) => {
-  console.log('you here')
+  console.log('COORDINATES')
   var id = phoneid;
   console.log('you here');
   (async () => {
@@ -163,7 +103,16 @@ socket.on('coordinates', (phoneid) => {
 })
 
 
-
+socket.on('main', (main_phone) => {
+  console.log('MAIN PHONEEEEEEE')
+  Account.updateOne({_id:main_phone.accountID}, {main_phone: main_phone.phoneID}, function(err, account) {
+    if (err) {
+      socket.emit('main', err)
+    } else {
+      socket.emit('main', account)
+    }
+  })
+})
 
 socket.on('signup', (auth) => {
   var account = new Account();

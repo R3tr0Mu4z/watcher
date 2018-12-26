@@ -34,8 +34,14 @@ class PhoneScreen extends Component {
       socket.emit('phone', addphone)
     }
 
+    main_phone = () => {
+      var main_phone = {};
+      main_phone.accountID = this.props.accountID;
+      main_phone.phoneID = this.props.phoneID;
+      console.log(main_phone, 'main_phone')
+      socket.emit('main', main_phone)
+    }
     hasphone = () => {
-      socket.disconnect();
       this.props.navigation.navigate('Main');
     }
 
@@ -46,6 +52,10 @@ class PhoneScreen extends Component {
         phone.id = resp._id;
         console.log(phone, 'PHOEN DATEALS')
         this.props.addphone(phone);
+        this.main_phone();
+      })
+      socket.on('main', (resp) => {
+        console.log(resp);
       })
       if (this.props.phoneID == null) {
         return (
@@ -70,6 +80,7 @@ class PhoneScreen extends Component {
 
 function mapStateToProps(state) {
     return {
+      accountID: state.accountID,
       phonename: state.phonename,
       phoneID: state.phoneID
     }

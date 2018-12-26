@@ -14,24 +14,63 @@ import socketIOClient from 'socket.io-client'
 import { connect } from 'react-redux';
 const endpoint = 'http://192.168.0.110:5000';
 const socket = socketIOClient(endpoint);
-
-async function getToken(){
-  if (!Expo.Constants.isDevice) {
-    return;
-  }
-  let { status } = await Expo.Permissions.askAsync(
-    Expo.Permissions.LOCATION,
-  );
-  if (status !== 'granted') {
-    return;
-  }
-  let value = await Expo.Notifications.getExpoPushTokenAsync();
-}
+const PUSH_ENDPOINT = 'http://192.168.0.110:5000/push';
+const REQUEST_ENDPOINT = 'http://192.168.0.110:5000/access';
 
 class TrackScreen extends Component {
-  componentDidMount() {
-    getToken();
+
+  async getToken(){
+    if (!Expo.Constants.isDevice) {
+      return;
+    }
+    let { status } = await Expo.Permissions.askAsync(
+      Expo.Permissions.LOCATION,
+    );
+    let { push_status } = await Expo.Permissions.askAsync(
+      Expo.Permissions.NOTIFICATIONS,
+    );
+
+    let value = await Expo.Notifications.getExpoPushTokenAsync();
+    console.log(value)
+    fetch(PUSH_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      accountID: this.props.accountID,
+      token: value
+    })
+
+  })
   }
+
+  componentDidMount() {
+    this.getToken();
+    this._notificationSubscription = Notifications.addListener(this._handleNotification);
+  }
+  _handleNotification = (notification) => {
+    console.log(notification.data.request, 'notification data type')
+    if (notification.data.request == "REQUEST_PHONE") {
+      console.log("request phone")
+      fetch(REQUEST_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        main_phone: this.props.phoneID,
+        accountID: notification.data.accountID
+      })
+
+    }).then(response => console.log(response, 'RESPONSEEEEEEEEEEEEE'))
+    } else if (notification.data.request == "REQUEST_STATUS") {
+      console.log("Status Requested")
+    }
+  };
+
     constructor() {
       super();
       this.state = {
@@ -39,7 +78,9 @@ class TrackScreen extends Component {
         long: null,
         speed: null,
         timestamp: null,
-        status: 'Unknown'
+        status: 'Unknown',
+        push: null,
+        req: null
       };
     }
     static navigationOptions = {
