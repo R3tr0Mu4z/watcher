@@ -15,6 +15,7 @@ var fetch = require('isomorphic-fetch');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 const EXPO_PUSH = 'https://exp.host/--/api/v2/push/send';
+const timeoutPromise = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
 
 function isEmptyObject(obj) {
   for (var key in obj) {
@@ -71,19 +72,27 @@ app.get('/requested', async function(request, response) {
   await Account.findOne({_id: request.body.accountID}, async function(err, found) {
     var phones = [];
     var length = found.requested_phones.length;
-    for (var i = 0; i < length; i++) {
-      console.log(found.requested_phones[i])
+    for (var rp of found.requested_phones) {
+      console.log(rp)
       var phone = {};
-      await Account.findOne({_id: found.requested_phones[i]}, function(err, requested_phone) {
+      await Account.findOne({_id: rp}, async function(err, requested_phone) {
         phone.name = requested_phone.email;
         phone._id = requested_phone._id;
         phones.push(phone)
+        console.log(phone)
       })
-      if (i == length-1) {
-        console.log(phones)
-        response.send(phones)
-      }
     }
+    await timeoutPromise(10000);
+    response.send(phones)
+  })
+});
+
+app.post('/enable', async function(request, response) {
+  Account.updateOne({_id: request.body.recaccountID}, {$addToSet:{phones: request.body.phoneID}}, function(err, account) {
+
+  })
+  Account.updateOne({_id: request.body.senaccountID}, {$pull:{requested_phones: request.body.recaccountID}},  function(err, found) {
+    response.send(err)
   })
 });
 
@@ -301,31 +310,5 @@ socket.on('login', (auth) => {
     console.log('user disconnected')
   })
 })
-
-// async function getCoords(id) {
-//    var coords = [];
-//    coords['coordinates'] = [];
-//    coords['marker'] = [];
-//    await Phone.findOne({_id: id}, async function(err, phone) {
-//     var locations = phone.locations;
-//     for (var i = 0; i <= locations.length-1; i++) {
-//       var coord = {};
-//       var marker = {};
-//       await Location.findOne({_id: locations[i]}, async function(err, loc) {
-//         coord['latitude'] = loc.lat;
-//         coord['longitude'] = loc.long;
-//         marker['latitude'] = loc.lat;
-//         marker['longitude'] = loc.long;
-//         marker['status'] = loc.status;
-//         marker['time'] = loc.timestamp;
-//         marker['speed'] = loc.speed;
-//         coords['coordinates'].push(coord);
-//         coords['marker'].push(marker);
-//       })
-//     }
-//     console.log(coords, 'Emitting these')
-//     socket.emit('coordinates', coords);
-//   })
-// }
 
 server.listen(port, () => console.log(`Listening on port ${port}`))

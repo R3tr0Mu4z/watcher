@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { Permissions, Notifications } from 'expo';
-import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
+import { Button, FormLabel, FormInput, FormValidationMessage, List, ListItem } from 'react-native-elements'
 import socketIOClient from 'socket.io-client'
 import { connect } from 'react-redux';
 const endpoint = 'http://192.168.0.110:5000';
@@ -112,7 +112,7 @@ class TrackScreen extends Component {
 
 
         return (
-    
+
             <View>
             <Text>{this.state.lat}</Text>
             <Text>{this.state.long}</Text>
