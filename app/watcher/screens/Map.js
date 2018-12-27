@@ -79,10 +79,10 @@ class MapScreen extends Component {
 
           <MapView.Polyline
         		coordinates={this.state.coordinates}
-        		strokeColor="#000" // fallback for when `strokeColors` is not supported by the map-provider
+        		strokeColor="#000"
         		strokeColors={[
         			'#7F0000',
-        			'#00000000', // no color, creates a "long" gradient between the previous and next coordinate
+        			'#00000000',
         			'#B24112',
         			'#E5845C',
         			'#238C23',

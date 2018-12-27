@@ -20,6 +20,7 @@ class AuthScreen extends React.Component {
   constructor() {
     super();
     this.state = {
+      name: null,
       email: null,
       password: null,
       accountID: null,
@@ -29,6 +30,7 @@ class AuthScreen extends React.Component {
   }
   signup = () => {
     var auth = {};
+    auth.name = this.state.name;
     auth.email = this.state.email;
     auth.password = this.state.password;
     socket.emit('signup', auth)
@@ -70,6 +72,8 @@ class AuthScreen extends React.Component {
     if (this.props.accountID == null) {
     return (
       <View style={styles.container}>
+      <FormLabel>Name</FormLabel>
+      <FormInput onChangeText={(name) => this.setState({name})}/>
       <FormLabel>Email</FormLabel>
       <FormInput onChangeText={(email) => this.setState({email})}/>
       <FormLabel>Password</FormLabel>

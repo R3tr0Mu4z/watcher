@@ -51,7 +51,7 @@ app.get('/phone', function(request, response) {
 
 
 app.get('/account', function(request, response) {
-  Account.findOne({main_phone: request.body.main_phone}, function(err, found) {
+  Account.findOne({_id: request.body.ID}, function(err, found) {
     response.send(found)
   })
 });
@@ -63,6 +63,26 @@ app.post('/access', function(request, response) {
       response.send(err)
     } else {
       response.send(account)
+    }
+  })
+});
+
+app.get('/requested', async function(request, response) {
+  await Account.findOne({_id: request.body.accountID}, async function(err, found) {
+    var phones = [];
+    var length = found.requested_phones.length;
+    for (var i = 0; i < length; i++) {
+      console.log(found.requested_phones[i])
+      var phone = {};
+      await Account.findOne({_id: found.requested_phones[i]}, function(err, requested_phone) {
+        phone.name = requested_phone.email;
+        phone._id = requested_phone._id;
+        phones.push(phone)
+      })
+      if (i == length-1) {
+        console.log(phones)
+        response.send(phones)
+      }
     }
   })
 });
@@ -117,6 +137,11 @@ socket.on('main', (main_phone) => {
 
 
 socket.on('gettoken', (sent) => {
+  if (sent.phoneID == null) {
+    console.log('phone id is null')
+    socket.emit('gettoken', 'Please enter a Phone ID')
+    return;
+  }
  Account.findOne({main_phone: sent.phoneID}, function(err, account) {
    console.log('gettoken')
     if (err) {
@@ -146,7 +171,7 @@ socket.on('gettoken', (sent) => {
       if (err) {
         // response.send(err)
       } else {
-        console.log('successssssssssssss')
+        socket.emit('gettoken', 'Request Sent')
       }
     })
   })
@@ -156,6 +181,7 @@ socket.on('signup', (auth) => {
   var account = new Account();
   var resp = {}
   console.log('you here asdasd');
+  account.name = auth.name;
   account.email = auth.email;
   account.password = auth.password;
   if (emailregex(account.email)) {

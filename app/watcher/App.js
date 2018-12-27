@@ -5,6 +5,7 @@ import PhoneScreen from './screens/Phone';
 import MainScreen from './screens/Main';
 import TrackScreen from './screens/Track';
 import MapScreen from './screens/Map';
+import AddScreen from './screens/Add';
 import { createStore } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist'
 import { Provider } from 'react-redux';
@@ -59,7 +60,8 @@ const AppStackNavigator = createStackNavigator({
   Main: {
     screen: createBottomTabNavigator({
       Track: TrackScreen,
-      Map: MapScreen
+      Map: MapScreen,
+      Add: AddScreen
     })
   }
 
