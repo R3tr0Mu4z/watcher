@@ -11,9 +11,10 @@ var db = mongoose.connect('mongodb://watcher:watcherpassE1@ds249092.mlab.com:490
 var Phone = require('./models/phone');
 var Account = require('./models/account');
 var Location = require('./models/location');
+var fetch = require('isomorphic-fetch');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-
+const EXPO_PUSH = 'https://exp.host/--/api/v2/push/send';
 
 function isEmptyObject(obj) {
   for (var key in obj) {
@@ -114,6 +115,35 @@ socket.on('main', (main_phone) => {
   })
 })
 
+
+socket.on('gettoken', (sent) => {
+ Account.findOne({main_phone: sent.phoneID}, function(err, account) {
+   console.log('gettoken')
+    if (err) {
+      socket.emit('gettoken', 'invalid phone')
+    } else {
+      console.log(account.token , ' < --- sending')
+      console.log(account._id, ' < ---- account')
+      fetch(EXPO_PUSH, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        to: account.token,
+        body: "Requesting access",
+        data: {
+          request: "REQUEST_PHONE",
+          accountID: account.accountID
+        }
+      })
+
+    }).then(response => console.log(response))
+
+    }
+  })
+})
 socket.on('signup', (auth) => {
   var account = new Account();
   var resp = {}

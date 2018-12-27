@@ -116,11 +116,23 @@ class TrackScreen extends Component {
       // this.getLocation();
     }
 
+    async requestPhone() {
+      var sent = {};
+      sent.phoneID = this.state.req;
+      sent.accountID = this.props.accountID;
+      socket.emit('gettoken', sent)
+    }
+
     render() {
         socket.on('location', (location) => {
           console.log(location, 'LOCATIOOOOOOOOOOOOON')
         })
+
+        socket.on('gettoken', (token) => {
+          console.log(token, 'TOKEN')
+        })
         return (
+            <View>
             <View>
             <Text>{this.state.lat}</Text>
             <Text>{this.state.long}</Text>
@@ -128,6 +140,7 @@ class TrackScreen extends Component {
             <Text>{this.state.timestamp}</Text>
             <Text>{this.state.status}</Text>
             <Text>{this.props.phoneID}</Text>
+            <Text>{this.state.req}</Text>
             <FormInput
             onChangeText={(status) => this.setState({status})}
             placeholder = "What are you doing?"
@@ -136,6 +149,17 @@ class TrackScreen extends Component {
             <Button
             onPress={() => this.getLocation() }
           title='START TRACKING' />
+            </View>
+              <View>
+              <FormInput
+              onChangeText={(req) => this.setState({req})}
+              placeholder = "Enter Phone ID"
+              />
+
+              <Button
+              onPress={() => this.requestPhone() }
+            title='START TRACKING' />
+              </View>
             </View>
 
         );
