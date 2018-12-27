@@ -54,18 +54,7 @@ class TrackScreen extends Component {
     console.log(notification.data.request, 'notification data type')
     if (notification.data.request == "REQUEST_PHONE") {
       console.log("request phone")
-      fetch(REQUEST_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        main_phone: this.props.phoneID,
-        accountID: notification.data.accountID
-      })
 
-    }).then(response => console.log(response, 'RESPONSEEEEEEEEEEEEE'))
     } else if (notification.data.request == "REQUEST_STATUS") {
       console.log("Status Requested")
     }
@@ -80,7 +69,7 @@ class TrackScreen extends Component {
         timestamp: null,
         status: 'Unknown',
         push: null,
-        req: null
+        req: '5c2457301120fa6dc78784b0'
       };
     }
     static navigationOptions = {

@@ -44,7 +44,7 @@ app.post('/push', function(request, response) {
 });
 
 app.get('/phone', function(request, response) {
-  Phone.findOne({_id: request.body.phoneID}, function(err, found) {
+  Account.findOne({main_phone: request.body.phoneID}, function(err, found) {
     response.send(found)
   })
 });
@@ -142,7 +142,15 @@ socket.on('gettoken', (sent) => {
     }).then(response => console.log(response))
 
     }
+    Account.updateOne({_id: account._id}, {$addToSet:{requested_phones: sent.accountID}}, function(err, account) {
+      if (err) {
+        // response.send(err)
+      } else {
+        console.log('successssssssssssss')
+      }
+    })
   })
+
 })
 socket.on('signup', (auth) => {
   var account = new Account();
