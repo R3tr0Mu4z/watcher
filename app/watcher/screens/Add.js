@@ -10,12 +10,10 @@ import {
 } from "react-native";
 import { Permissions, Notifications } from 'expo';
 import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
-import socketIOClient from 'socket.io-client'
 import { connect } from 'react-redux';
-const endpoint = 'http://192.168.0.110:5000';
-const socket = socketIOClient(endpoint);
 const PUSH_ENDPOINT = 'http://192.168.0.110:5000/push';
 const REQUEST_ENDPOINT = 'http://192.168.0.110:5000/access';
+const REQUEST_ACCESS_URL = 'http://192.168.0.110:5000/requestaccess'
 
 class AddScreen extends Component {
 
@@ -32,18 +30,25 @@ class AddScreen extends Component {
     }
 
     async requestPhone() {
-      var sent = {};
-      sent.phoneID = this.state.req;
-      sent.accountID = this.props.accountID;
-      socket.emit('gettoken', sent)
+      fetch(REQUEST_ACCESS_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+          phoneID: this.state.req,
+          accountID : this.props.accountID
+      })
+
+    }).then(response => response.json())
+    .then(json => {
+      console.log(json)
+    })
     }
 
     render() {
 
-
-        socket.on('gettoken', (token) => {
-          console.log(token, 'TOKEN')
-        })
         return (
             <View>
               <FormInput

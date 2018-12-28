@@ -10,13 +10,10 @@ import {
 } from "react-native";
 import { Permissions, Notifications } from 'expo';
 import { Button, FormLabel, FormInput, FormValidationMessage, List, ListItem } from 'react-native-elements'
-import socketIOClient from 'socket.io-client'
 import { connect } from 'react-redux';
-const endpoint = 'http://192.168.0.110:5000';
-const socket = socketIOClient(endpoint);
 const PUSH_ENDPOINT = 'http://192.168.0.110:5000/push';
 const REQUEST_ENDPOINT = 'http://192.168.0.110:5000/access';
-
+const LOCATION_ENDPOINT = 'http://192.168.0.110:5000/location';
 class TrackScreen extends Component {
 
   async getToken(){
@@ -93,23 +90,27 @@ class TrackScreen extends Component {
     }
 
     async locations() {
-      console.log(this.props, 'PROPSSSSSSSSSSSS')
-      var addlocation = {};
-      addlocation.phoneID = this.props.phoneID;
-      addlocation.lat = this.state.lat;
-      addlocation.long = this.state.long;
-      addlocation.speed = this.state.speed;
-      addlocation.timestamp = this.state.timestamp;
-      addlocation.status = this.state.status;
-      socket.emit('location', addlocation)
-      // this.getLocation();
+      fetch(LOCATION_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        phoneID : this.props.phoneID,
+        lat : this.state.lat,
+        long :this.state.long,
+        speed :this.state.speed,
+        timestamp : this.state.timestamp,
+        status : this.state.status
+      })
+    }).then(response => response.json())
+    .then(json => {
+      console.log(json)
+    })
     }
 
     render() {
-        socket.on('location', (location) => {
-          console.log(location, 'LOCATIOOOOOOOOOOOOON')
-        })
-
 
         return (
 

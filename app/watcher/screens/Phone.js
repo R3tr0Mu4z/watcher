@@ -10,11 +10,9 @@ import {
 } from "react-native";
 import { WebBrowser } from 'expo';
 import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
-import socketIOClient from 'socket.io-client'
 import { connect } from 'react-redux';
-const endpoint = 'http://192.168.0.110:5000';
-const socket = socketIOClient(endpoint)
-
+const PHONE_URL = 'http://192.168.0.110:5000/phone'
+const MAIN_PHONE_URL = 'http://192.168.0.110:5000/main-phone'
 class PhoneScreen extends Component {
     constructor() {
       super();
@@ -28,35 +26,47 @@ class PhoneScreen extends Component {
     }
 
     phone = () => {
-      var addphone = {};
-      addphone.accountID = this.props.accountID;
-      addphone.name = this.state.phonename;
-      socket.emit('phone', addphone)
+      fetch(PHONE_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        accountID : this.props.accountID,
+        name : this.state.phonename
+      })
+
+    }).then(response => response.json())
+    .then(json => {
+        var phone = {};
+        phone.name = json.title;
+        phone.id = json._id;
+        console.log(phone, 'PHOEN DATEALS')
+        this.props.addphone(phone);
+        console.log(this.props)
+        fetch(MAIN_PHONE_URL, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          accountID : this.props.accountID,
+          phoneID : this.props.phoneID
+        })
+
+      })
+    })
+
     }
 
-    main_phone = () => {
-      var main_phone = {};
-      main_phone.accountID = this.props.accountID;
-      main_phone.phoneID = this.props.phoneID;
-      console.log(main_phone, 'main_phone')
-      socket.emit('main', main_phone)
-    }
     hasphone = () => {
       this.props.navigation.navigate('Main');
     }
 
     render() {
-      socket.on('phone', (resp) => {
-        var phone = {};
-        phone.name = resp.title;
-        phone.id = resp._id;
-        console.log(phone, 'PHOEN DATEALS')
-        this.props.addphone(phone);
-        this.main_phone();
-      })
-      socket.on('main', (resp) => {
-        console.log(resp);
-      })
+
       if (this.props.phoneID == null) {
         return (
             <View>

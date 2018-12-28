@@ -10,11 +10,8 @@ import {
 } from "react-native";
 import { MapView } from 'expo';
 import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements';
-import socketIOClient from 'socket.io-client'
 import { connect } from 'react-redux';
-const endpoint = 'http://192.168.0.110:5000';
-const socket = socketIOClient(endpoint)
-
+const COORDINATES_URL = 'http://192.168.0.110:5000/coordinates';
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -33,22 +30,30 @@ class MapScreen extends Component {
     }
 
     async getCoordinates() {
-      var phoneid = this.props.phoneID;
-      socket.emit('coordinates', phoneid)
-      console.log(phoneid, 'PHONE ID');
-      await sleep(30000);
+      console.log(this.props.phoneID, 'getting coordinates')
+      fetch(COORDINATES_URL, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+          phoneid: this.props.phoneID
+      })
+    }).then(response => response.json())
+    .then(json => {
+      this.setState({coordinates: json.coordinates});
+      this.setState({markers: json.markers});
+      console.log(json)
+    })
+      await sleep(60000);
       this.getCoordinates()
     }
-    componentDidMount() {
+    componentWillMount() {
       this.getCoordinates();
     }
 
     render() {
-      socket.on('coordinates', (coordinates, markers) => {
-        this.setState({coordinates: coordinates});
-        this.setState({markers: markers});
-        // this.getCoordinates();
-      })
         return (
 
           <MapView
@@ -101,6 +106,7 @@ class MapScreen extends Component {
 
 function mapStateToProps(state) {
     return {
+      accountID: state.accountID,
       phonename: state.phonename,
       phoneID: state.phoneID
     }

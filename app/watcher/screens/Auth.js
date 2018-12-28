@@ -10,11 +10,9 @@ import {
 } from 'react-native';
 import Expo from 'expo';
 import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
-import socketIOClient from 'socket.io-client'
 import { connect } from 'react-redux';
-const endpoint = 'http://192.168.0.110:5000';
-const socket = socketIOClient(endpoint)
-
+const SIGNUP_URL = 'http://192.168.0.110:5000/registration';
+const LOGIN_URL = 'http://192.168.0.110:5000/login'
 class AuthScreen extends React.Component {
 
   constructor() {
@@ -29,20 +27,53 @@ class AuthScreen extends React.Component {
     };
   }
   signup = () => {
-    var auth = {};
-    auth.name = this.state.name;
-    auth.email = this.state.email;
-    auth.password = this.state.password;
-    socket.emit('signup', auth)
+    console.log('signup')
+    fetch(SIGNUP_URL, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        name: this.state.name,
+        email : this.state.email,
+        password: this.state.password
+    })
+
+  }).then(response => response.json())
+  .then(json => {
+    this.setState({accountID : json.id})
+    this.setState({auth : json.auth})
+    this.setState({mess : json.mess})
+    var auth = json.id;
+    this.props.signup(auth);
+    if (json.id !== null) {
+      this.props.navigation.navigate('Phone')
+    }
+    console.log(this.state)
+  })
   }
   login = () => {
-    var auth = {};
-    auth.email = this.state.email;
-    auth.password = this.state.password;
-    socket.emit('login', auth)
+    fetch(LOGIN_URL, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+        email : this.state.email,
+        password: this.state.password
+    })
+
+  }).then(response => response.json())
+  .then(json => {
+    this.setState({accountID : json.id})
+    this.setState({auth : json.auth})
+    this.setState({mess : json.mess})
+    console.log(this.state, 'login state')
+  })
   }
   authorized = () => {
-    socket.disconnect();
     this.props.navigation.navigate('Phone');
   }
 
@@ -51,23 +82,6 @@ class AuthScreen extends React.Component {
   };
 
   render() {
-    socket.on('signup', (resp) => {
-      this.setState({accountID : resp.id})
-      this.setState({auth : resp.auth})
-      this.setState({mess : resp.mess})
-      var auth = resp.id;
-      this.props.signup(auth);
-      if (resp.id !== null) {
-        this.props.navigation.navigate('Phone')
-      }
-    })
-    socket.on('login', (resp) => {
-      this.setState({accountID : resp.id})
-      this.setState({auth : resp.auth})
-      this.setState({mess : resp.mess})
-      console.log(resp, 'RESP')
-      console.log(this.state, 'login state')
-    })
 
     if (this.props.accountID == null) {
     return (
