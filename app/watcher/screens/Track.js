@@ -53,7 +53,7 @@ class TrackScreen extends Component {
       console.log("request phone")
 
     } else if (notification.data.request == "REQUEST_STATUS") {
-      console.log("Status Requested")
+      this.getLocation()
     }
   };
 

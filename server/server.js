@@ -49,6 +49,25 @@ app.get('/phone', function(request, response) {
 });
 
 
+app.post('/requested-phones', function(request, response) {
+   Account.findOne({_id: request.body.accountID}, async function(err, found) {
+      var phones = [];
+      var length = found.requested_phones.length;
+      for (var rp of found.requested_phones) {
+        console.log(rp)
+        var phone = {};
+        await Account.findOne({_id: rp}, async function(err, requested_phone) {
+          phone.name = requested_phone.email;
+          phone._id = requested_phone._id;
+          phones.push(phone)
+        })
+      }
+      await timeoutPromise(10000);
+      response.send(phones)
+    })
+});
+
+
 app.get('/account', function(request, response) {
   Account.findOne({_id: request.body.ID}, function(err, found) {
     response.send(found)
@@ -252,10 +271,6 @@ app.post('/requestaccess', async function(request, response) {
 })
 
 
-
-
-
-
 app.post('/access', function(request, response) {
   Account.updateOne({main_phone: request.body.main_phone}, {$addToSet:{requested_phones: request.body.accountID}}, function(err, account) {
     if (err) {
@@ -266,26 +281,9 @@ app.post('/access', function(request, response) {
   })
 });
 
-app.get('/requested', async function(request, response) {
-  await Account.findOne({_id: request.body.accountID}, async function(err, found) {
-    var phones = [];
-    var length = found.requested_phones.length;
-    for (var rp of found.requested_phones) {
-      console.log(rp)
-      var phone = {};
-      await Account.findOne({_id: rp}, async function(err, requested_phone) {
-        phone.name = requested_phone.email;
-        phone._id = requested_phone._id;
-        phones.push(phone)
-        console.log(phone)
-      })
-    }
-    await timeoutPromise(10000);
-    response.send(phones)
-  })
-});
 
 app.post('/enable', async function(request, response) {
+  console.log(request.body)
   Account.updateOne({_id: request.body.recaccountID}, {$addToSet:{phones: request.body.phoneID}}, function(err, account) {
 
   })
