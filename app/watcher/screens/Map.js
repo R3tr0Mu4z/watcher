@@ -30,7 +30,7 @@ class MapScreen extends Component {
     }
 
     async getCoordinates() {
-      console.log(this.props.phoneID, 'getting coordinates')
+      console.log(this.props.accountID, 'getting coordinates')
       fetch(COORDINATES_URL, {
       method: 'POST',
       headers: {
@@ -44,7 +44,6 @@ class MapScreen extends Component {
     .then(json => {
       this.setState({coordinates: json.coordinates});
       this.setState({markers: json.markers});
-      console.log(json)
     })
       await sleep(60000);
       this.getCoordinates()

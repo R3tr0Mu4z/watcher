@@ -145,11 +145,11 @@ app.post('/phone', function(request, response) {
 });
 
 app.post('/main-phone', function(request, response) {
-  Account.updateOne({_id:main_phone.accountID}, {main_phone: main_phone.phoneID}, function(err, account) {
+  Account.updateOne({_id:request.body.accountID}, {main_phone: request.body.phoneID}, function(err, account) {
     if (err) {
-      socket.emit('main', err)
+      response.send(err)
     } else {
-      socket.emit('main', account)
+      response.send(account)
     }
   })
 })
@@ -217,6 +217,7 @@ app.post('/requestaccess', async function(request, response) {
     if (err) {
       response.send('invalid phone')
     } else {
+      if (isEmptyObject(account) !== true) {
       console.log(account.token , ' < --- sending')
       console.log(account._id, ' < ---- account')
       fetch(EXPO_PUSH, {
@@ -237,12 +238,15 @@ app.post('/requestaccess', async function(request, response) {
     }).then(response => console.log(response))
 
     }
-    Account.updateOne({_id: account._id}, {$addToSet:{requested_phones: sent.accountID}}, function(err, account) {
+  }
+  if (isEmptyObject(account) !== true) {
+    Account.updateOne({_id: account._id}, {$addToSet:{requested_phones: request.body.accountID}}, function(err, account) {
       if (err) {
       } else {
         response.send('Request Sent')
       }
     })
+  }
   })
 
 })

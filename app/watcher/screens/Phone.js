@@ -45,6 +45,7 @@ class PhoneScreen extends Component {
         console.log(phone, 'PHOEN DATEALS')
         this.props.addphone(phone);
         console.log(this.props)
+        console.log(this.props)
         fetch(MAIN_PHONE_URL, {
         method: 'POST',
         headers: {
@@ -56,6 +57,9 @@ class PhoneScreen extends Component {
           phoneID : this.props.phoneID
         })
 
+      }).then(response => response.json())
+      .then(json => {
+        console.log(json)
       })
     })
 
