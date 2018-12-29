@@ -6,6 +6,7 @@ import MainScreen from './screens/Main';
 import TrackScreen from './screens/Track';
 import MapScreen from './screens/Map';
 import AddScreen from './screens/Add';
+import PhonesScreen from './screens/Phones.js';
 import { createStore } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist'
 import { Provider } from 'react-redux';
@@ -18,7 +19,8 @@ const initialState = {
   accountID: null,
   auth: '',
   mess: '',
-  phonename: null
+  phonename: null,
+  map: null
 }
 
 
@@ -29,6 +31,8 @@ const reducer = (state = initialState, action) => {
         case 'ADD_PHONE':
             console.log(state, 'MAIN APP JS STATE')
             return { accountID: state.accountID, phonename: action.phone.name, phoneID: action.phone.id }
+        case 'MAP_PHONE':
+            return { accountID: state.accountID, phonename: state.phonename, phoneID: state.phoneID, map: action.id }
     }
     return state
 }
@@ -57,10 +61,11 @@ class App extends React.Component {
 const AppStackNavigator = createStackNavigator({
   Home: AuthScreen,
   Phone: PhoneScreen,
+  Map: MapScreen,
   Main: {
     screen: createBottomTabNavigator({
       Track: TrackScreen,
-      Map: MapScreen,
+      Phones: PhonesScreen,
       Add: AddScreen
     })
   }

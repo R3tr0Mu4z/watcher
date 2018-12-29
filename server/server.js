@@ -30,7 +30,6 @@ function emailregex(email) {
 }
 
 
-
 app.post('/push', function(request, response) {
   console.log(request.body)
   Account.updateOne({_id:request.body.accountID}, {token: request.body.token}, function(err, account) {
@@ -48,6 +47,22 @@ app.get('/phone', function(request, response) {
   })
 });
 
+app.post('/phones', async function(request, response) {
+  console.log('here')
+  await Account.findOne({_id: request.body.ID}, async function(err, found) {
+    var phones = [];
+    for (var phone of found.phones) {
+      var phn = {};
+      await Phone.findOne({_id: phone._id}, async function(err, found) {
+        phn.name = found.title;
+        phn.id = found._id;
+      })
+      phones.push(phn);
+    }
+    await timeoutPromise(2000);
+    response.send(phones);
+  })
+});
 
 app.post('/requested-phones', function(request, response) {
    Account.findOne({_id: request.body.accountID}, async function(err, found) {

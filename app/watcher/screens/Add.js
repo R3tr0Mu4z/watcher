@@ -118,9 +118,8 @@ class AddScreen extends Component {
                       'Allow access?',
                       'User can view your location',
                       [
-                        {text: 'Ask me later', onPress: () => console.log(l._id)},
                         {text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-                        {text: 'OK', onPress: () => this.enable(l._id)},
+                        {text: 'Yes', onPress: () => this.enable(l._id)},
                       ],
                       { cancelable: false }
                     )}
