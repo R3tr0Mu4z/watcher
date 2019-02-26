@@ -1,19 +1,18 @@
 import React, { Component } from "react";
 import {
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+    Image,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { Container, Header, Content, Item, Input, Button, Text } from 'native-base';
 import { Permissions, Notifications } from 'expo';
-import { Button, FormLabel, FormInput, FormValidationMessage, List, ListItem } from 'react-native-elements'
 import { connect } from 'react-redux';
-const PUSH_ENDPOINT = 'http://192.168.0.110:5000/push';
-const REQUEST_ENDPOINT = 'http://192.168.0.110:5000/access';
-const LOCATION_ENDPOINT = 'http://192.168.0.110:5000/location';
+const PUSH_ENDPOINT = 'http://192.168.0.106:5000/push';
+const REQUEST_ENDPOINT = 'http://192.168.0.106:5000/access';
+const LOCATION_ENDPOINT = 'http://192.168.0.106:5000/location';
 class TrackScreen extends Component {
 
   async getToken(){
@@ -66,13 +65,15 @@ class TrackScreen extends Component {
         timestamp: null,
         status: 'Unknown',
         push: null,
-        req: null
+        req: null,
+        form: null
       };
     }
     static navigationOptions = {
         header: null
     }
     async getLocation() {
+      this.setState({form: 'Updating'});
       navigator.geolocation.getCurrentPosition(
        (position) => {
          console.log(position);
@@ -107,6 +108,7 @@ class TrackScreen extends Component {
     }).then(response => response.json())
     .then(json => {
       console.log(json)
+      this.setState({form: 'Updated'})
     })
     }
 
@@ -114,23 +116,26 @@ class TrackScreen extends Component {
 
         return (
 
-            <View>
-            <Text>{this.state.lat}</Text>
-            <Text>{this.state.long}</Text>
-            <Text>{this.state.speed}</Text>
-            <Text>{this.state.timestamp}</Text>
-            <Text>{this.state.status}</Text>
-            <Text>{this.props.phoneID}</Text>
-            <Text>{this.state.req}</Text>
-            <FormInput
-            onChangeText={(status) => this.setState({status})}
-            placeholder = "What are you doing?"
-            />
+            <Container>
+                <Content style={styles.formarea}>
 
-            <Button
-            onPress={() => this.getLocation() }
-          title='START TRACKING' />
-            </View>
+            <Item>
+                <Input
+                    placeholder='Type Your Status'
+                    onChangeText={(status) => this.setState({status})}/>
+            </Item>
+                <Text>{this.state.form}</Text>
+
+                <View style={styles.Buttonstyle}>
+                    <Button
+                        onPress={() => this.getLocation()}
+                        dark>
+                        <Text>Set Status</Text>
+                    </Button>
+
+                </View>
+                </Content>
+            </Container>
 
 
         );
@@ -152,10 +157,15 @@ function mapDispatchToProps(dispatch) {
 }
 
 const styles = StyleSheet.create({
-    container: {
+    Buttonstyle: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'stretch',
+        paddingTop: 10
+    },
+    formarea: {
+        paddingTop: 50
     }
 });
 

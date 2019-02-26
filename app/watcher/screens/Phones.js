@@ -12,7 +12,7 @@ import {
 import { Permissions, Notifications } from 'expo';
 import { Button, FormLabel, FormInput, FormValidationMessage, List, ListItem } from 'react-native-elements'
 import { connect } from 'react-redux';
-const PUSH_ENDPOINT = 'http://192.168.0.110:5000/phones';
+const PUSH_ENDPOINT = 'http://192.168.0.106:5000/phones';
 class PhonesScreen extends Component {
 
 
@@ -30,6 +30,7 @@ class PhonesScreen extends Component {
      }).then(response => response.json())
      .then(json => {
        this.setState({phones: json})
+         console.log(this.state, 'PHONE SCREEEEEEEN')
      })
 
    }
@@ -53,9 +54,9 @@ class PhonesScreen extends Component {
     }
 
     gps(id) {
-      console.log(id, 'gps')
-      this.props.mainphn(id);
-      console.log(this.props)
+      this.props.navigation.navigate('Map', {
+        mapphone: id,
+      });
     }
 
 
@@ -71,11 +72,11 @@ class PhonesScreen extends Component {
                   key={l.id}
                   title={l.name}
                   onPress={() => Alert.alert(
-                      'Allow access?',
+                      l.name,
                       'User can view your location',
                       [
-                        {text: 'Cancel', onPress: () => console.log(this.props)},
-                        {text: 'Yes', onPress: () => this.gps(l.id)},
+                        {text: 'Request location', onPress: () => console.log(this.props)},
+                        {text: 'View locations', onPress: () => this.gps(l.id)},
                       ],
                       { cancelable: false }
                     )}

@@ -4,15 +4,14 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Container, Header, Content, Item, Input, Button, Text } from 'native-base';
 import Expo from 'expo';
-import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
 import { connect } from 'react-redux';
-const SIGNUP_URL = 'http://192.168.0.110:5000/registration';
-const LOGIN_URL = 'http://192.168.0.110:5000/login'
+const SIGNUP_URL = 'http://192.168.0.106:5000/registration';
+const LOGIN_URL = 'http://192.168.0.106:5000/login'
 class AuthScreen extends React.Component {
 
   constructor() {
@@ -23,7 +22,8 @@ class AuthScreen extends React.Component {
       password: null,
       accountID: null,
       auth: '',
-      mess: ''
+      mess: '',
+      form: 'signup'
     };
   }
   signup = () => {
@@ -82,25 +82,72 @@ class AuthScreen extends React.Component {
   };
 
   render() {
-
     if (this.props.accountID == null) {
-    return (
-      <View style={styles.container}>
-      <FormLabel>Name</FormLabel>
-      <FormInput onChangeText={(name) => this.setState({name})}/>
-      <FormLabel>Email</FormLabel>
-      <FormInput onChangeText={(email) => this.setState({email})}/>
-      <FormLabel>Password</FormLabel>
-      <FormInput onChangeText={(password) => this.setState({password})}/>
-      <FormValidationMessage>{this.state.mess}</FormValidationMessage>
-      <Button
-      onPress={() => this.signup() }
-  title='SIGNUP' />
-  <Button
-  onPress={() => this.login() }
-title='LOGIN' />
-      </View>
-    );
+
+      if (this.state.form == 'signup') {
+        return (
+            <Container>
+            <Content style={styles.formarea}>
+            <Item>
+              <Input
+                  placeholder='Name'
+                  onChangeText={(name) => this.setState({name})}/>
+            </Item>
+            <Item>
+              <Input
+                  placeholder='Email'
+                  onChangeText={(email) => this.setState({email})}/>
+            </Item>
+            <Item>
+              <Input
+                  placeholder='Password     '
+                  onChangeText={(password) => this.setState({password})}/>
+            </Item>
+              <Text>{this.state.mess}</Text>
+                <View style={styles.Buttonstyle}>
+              <Button
+                  onPress={() => this.signup()}
+                  dark>
+              <Text>Sign Up</Text>
+              </Button>
+                </View>
+              <TouchableOpacity
+                  onPress={() => this.setState({form: 'login'})}>
+                <Text>Already have an account? Sign In</Text>
+              </TouchableOpacity>
+            </Content>
+            </Container>
+        );
+      } else {
+        return (
+            <Container>
+                <Content style={styles.formarea}>
+                <Item>
+                    <Input
+                        placeholder='Email'
+                        onChangeText={(email) => this.setState({email})}/>
+                </Item>
+                <Item>
+                    <Input
+                        placeholder='Password     '
+                        onChangeText={(password) => this.setState({password})}/>
+                </Item>
+                  <Text>{this.state.mess}</Text>
+                <View style={styles.Buttonstyle}>
+                  <Button
+                      onPress={() => this.login()}
+                      dark>
+                      <Text>Sign In</Text>
+                  </Button>
+                </View>
+                  <TouchableOpacity
+                      onPress={() => this.setState({form: 'signup'})}>
+                    <Text>Don't have an account? Sign Up</Text>
+                  </TouchableOpacity>
+            </Content>
+            </Container>
+        );
+      }
   } else {
 
       return (
@@ -132,10 +179,15 @@ function mapDispatchToProps(dispatch) {
 
 
 const styles = StyleSheet.create({
-  container: {
+Buttonstyle: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 100
-  },
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'stretch',
+    paddingBottom: 10
+},
+formarea: {
+    paddingTop: 50
+}
 });
 export default connect(mapStateToProps, mapDispatchToProps)(AuthScreen)

@@ -12,11 +12,11 @@ import {
 import { Permissions, Notifications } from 'expo';
 import { Button, FormLabel, FormInput, FormValidationMessage, List, ListItem } from 'react-native-elements'
 import { connect } from 'react-redux';
-const PUSH_ENDPOINT = 'http://192.168.0.110:5000/push';
-const REQUEST_ENDPOINT = 'http://192.168.0.110:5000/access';;
-const REQUEST_ACCESS_URL = 'http://192.168.0.110:5000/requestaccess';
-const REQUESTED_PHONES_URL = 'http://192.168.0.110:5000/requested-phones';
-const ENABLE_ENDPOINT = 'http://192.168.0.110:5000/enable';
+const PUSH_ENDPOINT = 'http://192.168.0.106:5000/push';
+const REQUEST_ENDPOINT = 'http://192.168.0.106:5000/access';;
+const REQUEST_ACCESS_URL = 'http://192.168.0.106:5000/requestaccess';
+const REQUESTED_PHONES_URL = 'http://192.168.0.106:5000/requested-phones';
+const ENABLE_ENDPOINT = 'http://192.168.0.106:5000/enable';
 const timeoutPromise = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
 
 class AddScreen extends Component {

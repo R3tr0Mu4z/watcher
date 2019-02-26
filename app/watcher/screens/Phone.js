@@ -1,18 +1,17 @@
 import React, { Component } from "react";
 import {
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+    Image,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { Container, Header, Content, Item, Input, Button, Text } from 'native-base';
 import { WebBrowser } from 'expo';
-import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
 import { connect } from 'react-redux';
-const PHONE_URL = 'http://192.168.0.110:5000/phone'
-const MAIN_PHONE_URL = 'http://192.168.0.110:5000/main-phone'
+const PHONE_URL = 'http://192.168.0.106:5000/phone'
+const MAIN_PHONE_URL = 'http://192.168.0.106:5000/main-phone'
 class PhoneScreen extends Component {
     constructor() {
       super();
@@ -73,14 +72,22 @@ class PhoneScreen extends Component {
 
       if (this.props.phoneID == null) {
         return (
-            <View>
-            <FormLabel>Phone Name</FormLabel>
-            <FormInput onChangeText={(phonename) => this.setState({phonename})}/>
-            <FormValidationMessage>{this.props.phoneID}</FormValidationMessage>
-            <Button
-            onPress={() => this.phone() }
-          title='SAVE' />
-            </View>
+            <Container>
+                <Content style={styles.phonearea}>
+                    <Item>
+                        <Input
+                            placeholder='Phone Name'
+                            onChangeText={(phonename) => this.setState({phonename})}/>
+                    </Item>
+                    <View style={styles.Buttonstyle}>
+                        <Button
+                            onPress={() => this.phone()}
+                            dark>
+                            <Text>Save</Text>
+                        </Button>
+                    </View>
+                </Content>
+            </Container>
         );
       } else {
         return (
@@ -107,11 +114,17 @@ function mapDispatchToProps(dispatch) {
 }
 
 const styles = StyleSheet.create({
-    container: {
+    phonearea: {
+        paddingTop: 50
+    },
+    Buttonstyle: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    }
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'stretch',
+        paddingBottom: 10,
+        paddingTop: 10
+    },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhoneScreen)
