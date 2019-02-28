@@ -4,14 +4,13 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
-  View,
   Alert
 } from "react-native";
 import { Permissions, Notifications } from 'expo';
-import { Button, FormLabel, FormInput, FormValidationMessage, List, ListItem } from 'react-native-elements'
+import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle, List, ListItem, Thumbnail } from 'native-base';
 import { connect } from 'react-redux';
+const EXPO_UPDATE = 'http://192.168.0.106:5000/requestupdate';
 const PUSH_ENDPOINT = 'http://192.168.0.106:5000/phones';
 class PhonesScreen extends Component {
 
@@ -24,7 +23,8 @@ class PhonesScreen extends Component {
          'Content-Type': 'application/json',
        },
        body: JSON.stringify({
-           ID: this.props.accountID
+           ID: this.props.accountID,
+           secretkey: "gonnachangethislater"
        })
 
      }).then(response => response.json())
@@ -33,6 +33,24 @@ class PhonesScreen extends Component {
          console.log(this.state, 'PHONE SCREEEEEEEN')
      })
 
+   }
+
+   requestUpdate(id) {
+       fetch(EXPO_UPDATE, {
+           method: 'POST',
+           headers: {
+               Accept: 'application/json',
+               'Content-Type': 'application/json',
+           },
+           body: JSON.stringify({
+                   request: "REQUEST_UPDATE",
+                   phoneID: id,
+                   sphoneID: this.props.phoneID,
+                   secretkey: "gonnachangethislater"
+
+           })
+
+       }).then(response => console.log(response))
    }
 
 
@@ -61,30 +79,54 @@ class PhonesScreen extends Component {
 
 
     render() {
-
+        this.state.phones.shift(0);
         return (
+        <Container>
 
-          <View>
-          <List containerStyle={{marginBottom: 20}}>
+            <Header style={styles.headr}>
+                <Left>
+                    <Title>Phones</Title>
+                </Left>
+                <Body>
+
+                </Body>
+                <Right />
+            </Header>
+            <Content>
+                <List>
             {
+
               this.state.phones.map((l) => (
                 <ListItem
-                  key={l.id}
-                  title={l.name}
+
                   onPress={() => Alert.alert(
                       l.name,
-                      'User can view your location',
+                      l.user,
                       [
-                        {text: 'Request location', onPress: () => console.log(this.props)},
+                        {text: 'Request location', onPress: () => this.requestUpdate(l.id)},
                         {text: 'View locations', onPress: () => this.gps(l.id)},
                       ],
                       { cancelable: false }
                     )}
-                />
+                avatar>
+
+                    <Body>
+                    <Text>
+                        {l.name}
+                    </Text>
+                    <Text note>
+                        {l.user}
+                    </Text>
+                    </Body>
+                    <Right>
+
+                    </Right>
+                </ListItem>
               ))
             }
-          </List>
-          </View>
+                </List>
+            </Content>
+        </Container>
 
         );
     }
@@ -110,7 +152,10 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center'
-    }
+    },
+    headr: {
+        backgroundColor: '#000'
+    },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(PhonesScreen)

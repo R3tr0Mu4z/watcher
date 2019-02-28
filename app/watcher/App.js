@@ -66,10 +66,15 @@ const AppStackNavigator = createStackNavigator({
     screen: createBottomTabNavigator({
       Track: TrackScreen,
       Phones: PhonesScreen,
-      Add: AddScreen
+      Request: AddScreen
     })
   }
-
+},
+{
+    headerMode: 'none',
+    navigationOptions: {
+        headerVisible: false,
+    }
 })
 const styles = StyleSheet.create({
   container: {

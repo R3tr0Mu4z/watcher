@@ -1,8 +1,10 @@
-const express = require('express')
-const http = require('http')
-const port = 5000
-const app = express()
-const server = http.createServer(app)
+const express = require('express');
+const http = require('http');
+const port = 5000;
+const app = express();
+const server = http.createServer(app);
+const nodemailer = require("nodemailer");
+const crypto = require('crypto');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var db = mongoose.connect('mongodb://watcher:watcherpassE1@ds249092.mlab.com:49092/watcher');
@@ -14,7 +16,15 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 const EXPO_PUSH = 'https://exp.host/--/api/v2/push/send';
 const timeoutPromise = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
+var key = "gonnachangethislater";
 
+function checkckey(value,key) {
+    if (value == key) {
+        return true;
+    } else {
+        return false;
+    }
+}
 function isEmptyObject(obj) {
   for (var key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -31,6 +41,7 @@ function emailregex(email) {
 
 
 app.post('/push', function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   console.log(request.body)
   Account.updateOne({_id:request.body.accountID}, {token: request.body.token}, function(err, account) {
     if (err) {
@@ -42,13 +53,14 @@ app.post('/push', function(request, response) {
 });
 
 app.get('/phone', function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   Account.findOne({main_phone: request.body.phoneID}, function(err, found) {
     response.send(found)
   })
 });
 
 app.post('/phones', async function(request, response) {
-  console.log('here')
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   await Account.findOne({_id: request.body.ID}, async function(err, found) {
     var phones = [];
     for (var phone of found.phones) {
@@ -56,7 +68,10 @@ app.post('/phones', async function(request, response) {
       await Phone.findOne({_id: phone._id}, async function(err, found) {
         phn.name = found.title;
         phn.id = found._id;
-      })
+      });
+     await Account.findOne({main_phone: phone._id}, async function(err, found) {
+        phn.user = found.name;
+     });
       phones.push(phn);
     }
     await timeoutPromise(2000);
@@ -65,6 +80,7 @@ app.post('/phones', async function(request, response) {
 });
 
 app.post('/requested-phones', function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
    Account.findOne({_id: request.body.accountID}, async function(err, found) {
       var phones = [];
       var length = found.requested_phones.length;
@@ -72,7 +88,7 @@ app.post('/requested-phones', function(request, response) {
         console.log(rp)
         var phone = {};
         await Account.findOne({_id: rp}, async function(err, requested_phone) {
-          phone.name = requested_phone.email;
+          phone.name = requested_phone.name;
           phone._id = requested_phone._id;
           phones.push(phone)
         })
@@ -84,18 +100,21 @@ app.post('/requested-phones', function(request, response) {
 
 
 app.get('/account', function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   Account.findOne({_id: request.body.ID}, function(err, found) {
     response.send(found)
   })
 });
 
 app.post('/registration', function(request, response) {
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+  console.log('here')
   var account = new Account();
-  var resp = {}
-  console.log('you here asdasd');
+  var resp = {};
   account.name = request.body.name;
   account.email = request.body.email;
   account.password = request.body.password;
+  account.password = crypto.createHash('md5').update(account.password).digest('hex');
   if (emailregex(account.email)) {
   Account.findOne({email: account.email}, function(err, found) {
     if (isEmptyObject(found)) {
@@ -133,10 +152,12 @@ app.post('/registration', function(request, response) {
 });
 
 app.post('/login', function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   var account = new Account();
   var resp = {}
   account.email = request.body.email;
   account.password = request.body.password;
+  account.password = crypto.createHash('md5').update(account.password).digest('hex');
   if (emailregex(account.email)) {
   Account.findOne({email: account.email, password: account.password}, function(err, found) {
     console.log()
@@ -161,6 +182,7 @@ app.post('/login', function(request, response) {
 })
 
 app.post('/phone', function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   var phone = new Phone();
   phone.title = request.body.name;
   phone.accountID = request.body.accountID;
@@ -179,6 +201,7 @@ app.post('/phone', function(request, response) {
 });
 
 app.post('/main-phone', function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   Account.updateOne({_id:request.body.accountID}, {main_phone: request.body.phoneID}, function(err, account) {
     if (err) {
       response.send(err)
@@ -189,6 +212,8 @@ app.post('/main-phone', function(request, response) {
 })
 
 app.post('/location', function(request, response) {
+    console.log('here');
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   var location = new Location();
   location.lat = request.body.lat;
   location.long = request.body.long;
@@ -211,6 +236,7 @@ app.post('/location', function(request, response) {
 
 
 app.post('/coordinates', async function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
     var coords = [];
     coords['coordinates'] = [];
     coords['marker'] = [];
@@ -241,19 +267,22 @@ app.post('/coordinates', async function(request, response) {
 })
 
 app.post('/requestaccess', async function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   if (request.body.phoneID == null) {
     console.log('phone id is null')
-    response.send('Please enter a Phone ID')
+    var res = {};
+    res.stat = 'Invalid phone';
+    response.send(res)
     return;
   }
  Account.findOne({main_phone: request.body.phoneID}, function(err, account) {
-   console.log('gettoken')
     if (err) {
-      response.send('invalid phone')
+        var res = {};
+        res.stat = 'Invalid phone';
+        response.send(res)
     } else {
-      if (isEmptyObject(account) !== true) {
-      console.log(account.token , ' < --- sending')
-      console.log(account._id, ' < ---- account')
+      if (isEmptyObject(account) !== true){
+      console.log(account)
       fetch(EXPO_PUSH, {
       method: 'POST',
       headers: {
@@ -262,7 +291,7 @@ app.post('/requestaccess', async function(request, response) {
       },
       body: JSON.stringify({
         to: account.token,
-        body: "Requesting access",
+        body: account.name+" is Requesting access",
         data: {
           request: "REQUEST_PHONE",
           accountID: account.accountID
@@ -277,7 +306,9 @@ app.post('/requestaccess', async function(request, response) {
     Account.updateOne({_id: account._id}, {$addToSet:{requested_phones: request.body.accountID}}, function(err, account) {
       if (err) {
       } else {
-        response.send('Request Sent')
+          var res = {};
+          res.stat = 'Request sent';
+          response.send(res)
       }
     })
   }
@@ -285,8 +316,40 @@ app.post('/requestaccess', async function(request, response) {
 
 })
 
+app.post('/requestupdate', async function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+    Account.findOne({main_phone: request.body.phoneID}, function(err, account) {
+        if (err) {
+            var res = {};
+            res.stat = 'Invalid phone';
+            response.send(res)
+        } else {
+            if (isEmptyObject(account) !== true){
+                Account.findOne({main_phone: request.body.sphoneID}, function(err, saccount) {
+                    console.log(saccount)
+                    fetch(EXPO_PUSH, {
+                        method: 'POST',
+                        headers: {
+                            Accept: 'application/json',
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            to: account.token,
+                            body: saccount.name + " is requesting location update",
+                            data: {
+                                request: "REQUEST_UPDATE",
+                            }
+                        })
+
+                    }).then(response => response.send(response))
+                });
+            }
+        }
+    })
+})
 
 app.post('/access', function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   Account.updateOne({main_phone: request.body.main_phone}, {$addToSet:{requested_phones: request.body.accountID}}, function(err, account) {
     if (err) {
       response.send(err)
@@ -298,14 +361,51 @@ app.post('/access', function(request, response) {
 
 
 app.post('/enable', async function(request, response) {
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   console.log(request.body)
   Account.updateOne({_id: request.body.recaccountID}, {$addToSet:{phones: request.body.phoneID}}, function(err, account) {
 
   })
   Account.updateOne({_id: request.body.senaccountID}, {$pull:{requested_phones: request.body.recaccountID}},  function(err, found) {
-    response.send(err)
+      var res = {};
+      res.stat = 1;
+      response.send(res);
   })
 });
 
+app.post('/resetpass', async function(request, response) {
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 10; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+        hash = crypto.createHash('md5').update(text).digest('hex');
+        Account.updateOne({email:request.body.email}, {password: hash},async function(err, account) {
+            let transporter = nodemailer.createTransport({
+                host: "smtp.sendgrid.net",
+                port: 465,
+                secure: true,
+                auth: {
+                    user: 'r3tr0tech',
+                    pass: 'gonnachange1'
+                }
+            });
+
+            let mailOptions = {
+                from: '"Watcher" <info@r3tr0.tech>',
+                to: "smuazali1998@gmail.com",
+                subject: "Reset Password",
+                text: "Your Watcher password has been set to "+text
+            };
+
+            let info = await transporter.sendMail(mailOptions)
+
+            console.log("Message sent: %s");
+
+    })
+
+
+});
 
 server.listen(port, () => console.log(`Listening on port ${port}`))

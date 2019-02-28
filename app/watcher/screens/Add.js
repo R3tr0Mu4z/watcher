@@ -4,16 +4,15 @@ import {
   Platform,
   ScrollView,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
   Alert
 } from "react-native";
 import { Permissions, Notifications } from 'expo';
-import { Button, FormLabel, FormInput, FormValidationMessage, List, ListItem } from 'react-native-elements'
+import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle, List, ListItem, Thumbnail } from 'native-base';
 import { connect } from 'react-redux';
 const PUSH_ENDPOINT = 'http://192.168.0.106:5000/push';
-const REQUEST_ENDPOINT = 'http://192.168.0.106:5000/access';;
+const REQUEST_ENDPOINT = 'http://192.168.0.106:5000/access';
 const REQUEST_ACCESS_URL = 'http://192.168.0.106:5000/requestaccess';
 const REQUESTED_PHONES_URL = 'http://192.168.0.106:5000/requested-phones';
 const ENABLE_ENDPOINT = 'http://192.168.0.106:5000/enable';
@@ -42,12 +41,13 @@ class AddScreen extends Component {
       },
       body: JSON.stringify({
           phoneID: this.state.req,
-          accountID : this.props.accountID
+          accountID : this.props.accountID,
+          secretkey: "gonnachangethislater"
       })
 
     }).then(response => response.json())
     .then(json => {
-      console.log(json);
+        this.setState({req: json.stat})
     })
     }
 
@@ -60,7 +60,8 @@ class AddScreen extends Component {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-          accountID : this.props.accountID
+          accountID : this.props.accountID,
+          secretkey: "gonnachangethislater"
       })
 
     }).then(response => response.json())
@@ -80,11 +81,13 @@ class AddScreen extends Component {
       body: JSON.stringify({
         recaccountID: id,
         senaccountID: this.props.accountID,
-        phoneID: this.props.phoneID
+        phoneID: this.props.phoneID,
+        secretkey: "gonnachangethislater"
       })
 
     }).then(response => response.json())
     .then(json => {
+      this.state.list = null;
       this.requestedPhones()
     })
     }
@@ -95,25 +98,49 @@ class AddScreen extends Component {
     render() {
 
         return (
-            <View>
-              <FormInput
-              onChangeText={(req) => this.setState({req})}
-              placeholder = "Enter Phone ID"
-              />
+            <Container>
+                <Header style={styles.headr}>
+                    <Left>
+                        <Title>Request</Title>
+                    </Left>
+                    <Body>
 
-              <Button
-              onPress={() => this.requestPhone() }
-            title='REQUEST ACCESS' />
-            <Button
-            onPress={() => this.requestedPhones() }
-          title='CHECK' />
-          <Text>{this.state.loading}</Text>
-          <List containerStyle={{marginBottom: 20}}>
+                    </Body>
+                    <Right />
+                </Header>
+                <Content style={styles.formarea}>
+                <Item>
+                  <Input
+                  onChangeText={(req) => this.setState({req})}
+                  placeholder = "Enter Phone ID"
+                  />
+                </Item>
+            <View style={styles.Buttonstyle}>
+                <Button
+                    onPress={() => this.requestPhone()}
+                    dark>
+                    <Text>Request Access</Text>
+                </Button>
+
+            </View>
+            <View>
+                <Text>{this.state.req}</Text>
+            </View>
+            <View>
+                <Text>Your Phone ID : {this.props.phoneID}</Text>
+            </View>
+
+        <Item>
+        <Text>Pending Requests</Text>
+        </Item>
+            <View>
+            <Text>{this.state.loading}</Text>
+            </View>
+          <List>
             {
               this.state.list.map((l) => (
                 <ListItem
                   key={l._id}
-                  title={l.name}
                   onPress={() => Alert.alert(
                       'Allow access?',
                       'User can view your location',
@@ -123,12 +150,14 @@ class AddScreen extends Component {
                       ],
                       { cancelable: false }
                     )}
-                />
+                >
+                    <Text>{l.name}</Text>
+                </ListItem>
               ))
             }
           </List>
-            </View>
-
+                </Content>
+            </Container>
 
         );
     }
@@ -149,11 +178,19 @@ function mapDispatchToProps(dispatch) {
 }
 
 const styles = StyleSheet.create({
-    container: {
+    Buttonstyle: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center'
-    }
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'stretch',
+        paddingTop: 10
+    },
+    formarea: {
+        paddingTop: 10
+    },
+    headr: {
+        backgroundColor: '#000'
+    },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddScreen)

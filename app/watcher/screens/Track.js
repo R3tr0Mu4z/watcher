@@ -7,7 +7,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import { Container, Header, Content, Item, Input, Button, Text } from 'native-base';
+import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle } from 'native-base';
 import { Permissions, Notifications } from 'expo';
 import { connect } from 'react-redux';
 const PUSH_ENDPOINT = 'http://192.168.0.106:5000/push';
@@ -36,7 +36,8 @@ class TrackScreen extends Component {
     },
     body: JSON.stringify({
       accountID: this.props.accountID,
-      token: value
+      token: value,
+      secretkey: "gonnachangethislater"
     })
 
   })
@@ -103,7 +104,8 @@ class TrackScreen extends Component {
         long :this.state.long,
         speed :this.state.speed,
         timestamp : this.state.timestamp,
-        status : this.state.status
+        status : this.state.status,
+        secretkey: "gonnachangethislater"
       })
     }).then(response => response.json())
     .then(json => {
@@ -117,6 +119,15 @@ class TrackScreen extends Component {
         return (
 
             <Container>
+                <Header style={styles.headr}>
+                    <Left>
+                        <Title>Status</Title>
+                    </Left>
+                    <Body>
+
+                    </Body>
+                    <Right />
+                </Header>
                 <Content style={styles.formarea}>
 
             <Item>
@@ -165,8 +176,11 @@ const styles = StyleSheet.create({
         paddingTop: 10
     },
     formarea: {
-        paddingTop: 50
-    }
+        paddingTop: 10
+    },
+    headr: {
+        backgroundColor: '#000'
+    },
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(TrackScreen)

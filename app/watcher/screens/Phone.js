@@ -33,7 +33,8 @@ class PhoneScreen extends Component {
       },
       body: JSON.stringify({
         accountID : this.props.accountID,
-        name : this.state.phonename
+        name : this.state.phonename,
+        secretkey: "gonnachangethislater"
       })
 
     }).then(response => response.json())
@@ -53,7 +54,8 @@ class PhoneScreen extends Component {
         },
         body: JSON.stringify({
           accountID : this.props.accountID,
-          phoneID : this.props.phoneID
+          phoneID : this.props.phoneID,
+          secretkey: "gonnachangethislater"
         })
 
       }).then(response => response.json())

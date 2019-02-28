@@ -11,7 +11,9 @@ import { Container, Header, Content, Item, Input, Button, Text } from 'native-ba
 import Expo from 'expo';
 import { connect } from 'react-redux';
 const SIGNUP_URL = 'http://192.168.0.106:5000/registration';
-const LOGIN_URL = 'http://192.168.0.106:5000/login'
+const LOGIN_URL = 'http://192.168.0.106:5000/login';
+var key = "gonnachangethislater";
+
 class AuthScreen extends React.Component {
 
   constructor() {
@@ -23,11 +25,12 @@ class AuthScreen extends React.Component {
       accountID: null,
       auth: '',
       mess: '',
-      form: 'signup'
+      form: 'signup',
+      secretkey: "gonnachangethislater"
     };
   }
   signup = () => {
-    console.log('signup')
+    console.log(this.props, 'this.props')
     fetch(SIGNUP_URL, {
     method: 'POST',
     headers: {
@@ -37,7 +40,8 @@ class AuthScreen extends React.Component {
     body: JSON.stringify({
         name: this.state.name,
         email : this.state.email,
-        password: this.state.password
+        password: this.state.password,
+        secretkey: "gonnachangethislater"
     })
 
   }).then(response => response.json())
@@ -62,7 +66,8 @@ class AuthScreen extends React.Component {
     },
     body: JSON.stringify({
         email : this.state.email,
-        password: this.state.password
+        password: this.state.password,
+        secretkey: "gonnachangethislater"
     })
 
   }).then(response => response.json())

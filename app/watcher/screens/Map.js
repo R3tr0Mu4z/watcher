@@ -229,7 +229,8 @@ class MapScreen extends Component {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-          phoneid: mapphone
+          phoneid: mapphone,
+          secretkey: "gonnachangethislater"
       })
     }).then(response => response.json())
     .then(json => {
@@ -289,7 +290,7 @@ class MapScreen extends Component {
 
           <MapView.Polyline
         		coordinates={this.state.coordinates}
-        		strokeColor="#000"
+        		strokeColor="#fff"
         		strokeColors={[
         			'#7F0000',
         			'#00000000',
@@ -298,7 +299,7 @@ class MapScreen extends Component {
         			'#238C23',
         			'#7F0000'
         		]}
-        		strokeWidth={6}
+        		strokeWidth={4}
         	/>
           </MapView>
 
