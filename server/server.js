@@ -18,6 +18,7 @@ const EXPO_PUSH = 'https://exp.host/--/api/v2/push/send';
 const timeoutPromise = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
 var key = "gonnachangethislater";
 
+//Check key
 function checkckey(value,key) {
     if (value == key) {
         return true;
@@ -25,6 +26,8 @@ function checkckey(value,key) {
         return false;
     }
 }
+
+//Check if empty
 function isEmptyObject(obj) {
   for (var key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -34,14 +37,21 @@ function isEmptyObject(obj) {
   return true;
 }
 
+//Email Regex
 function emailregex(email) {
   var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
 }
 
+//Password Regex
+function passRegex(pass) {
+    var re = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    return re.test(pass);
+}
 
+//Add expo token
 app.post('/push', function(request, response) {
-    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   console.log(request.body)
   Account.updateOne({_id:request.body.accountID}, {token: request.body.token}, function(err, account) {
     if (err) {
@@ -53,14 +63,15 @@ app.post('/push', function(request, response) {
 });
 
 app.get('/phone', function(request, response) {
-    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   Account.findOne({main_phone: request.body.phoneID}, function(err, found) {
     response.send(found)
   })
 });
 
+//Phones
 app.post('/phones', async function(request, response) {
-    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   await Account.findOne({_id: request.body.ID}, async function(err, found) {
     var phones = [];
     for (var phone of found.phones) {
@@ -79,8 +90,9 @@ app.post('/phones', async function(request, response) {
   })
 });
 
+//Pending requests
 app.post('/requested-phones', function(request, response) {
-    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+   if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
    Account.findOne({_id: request.body.accountID}, async function(err, found) {
       var phones = [];
       var length = found.requested_phones.length;
@@ -100,17 +112,25 @@ app.post('/requested-phones', function(request, response) {
 
 
 app.get('/account', function(request, response) {
-    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   Account.findOne({_id: request.body.ID}, function(err, found) {
     response.send(found)
   })
 });
 
+//Registration
 app.post('/registration', function(request, response) {
-  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
-  console.log('here')
-  var account = new Account();
   var resp = {};
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+    if (request.body.email == null || request.body.password == null || request.body.name == null) {
+        resp.id = null;
+        resp.auth = null;
+        resp.mess = 'Name, Email or Password can not be empty';
+        response.send(resp);
+        return;
+    }
+  console.log(request.body);
+  var account = new Account();
   account.name = request.body.name;
   account.email = request.body.email;
   account.password = request.body.password;
@@ -118,10 +138,12 @@ app.post('/registration', function(request, response) {
   if (emailregex(account.email)) {
   Account.findOne({email: account.email}, function(err, found) {
     if (isEmptyObject(found)) {
+    if (passRegex(request.body.password)) {
       account.save(function(err, savedAccount) {
          if (err) {
              console.log('fail')
              response.send('Signup failed')
+             return;
          } else {
              console.log(savedAccount)
              resp.id = savedAccount._id;
@@ -131,11 +153,19 @@ app.post('/registration', function(request, response) {
          }
       });
     } else {
+        resp.id = null;
+        resp.auth = null;
+        resp.mess = 'Password must contain minimum eight characters, at least one letter and one number';
+        response.send(resp);
+        return;
+    }
+    } else {
     console.log('Email already exists')
     resp.id = null;
     resp.auth = null;
     resp.mess = 'Email already exists';
     response.send(resp);
+    return;
   }
   })
 } else if (account.email == null || account.password == null) {
@@ -143,27 +173,38 @@ app.post('/registration', function(request, response) {
     resp.auth = null;
     resp.mess = 'Please enter email and password';
     response.send(resp)
+      return;
 } else {
   resp.id = null;
   resp.auth = null;
   resp.mess = 'Invalid Email';
-  response.send(response)
+  response.send(resp)
+  return;
 }
 });
 
+//Login
 app.post('/login', function(request, response) {
-    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
-  var account = new Account();
-  var resp = {}
-  account.email = request.body.email;
-  account.password = request.body.password;
-  account.password = crypto.createHash('md5').update(account.password).digest('hex');
-  if (emailregex(account.email)) {
-  Account.findOne({email: account.email, password: account.password}, function(err, found) {
-    console.log()
-    if (isEmptyObject(found)) {
-      resp.mess = 'Email or password is incorrect';
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+  var resp = {};
+  var password = request.body.password;
+  var email = request.body.email;
+  if (email == null || password == null) {
+      resp.id = null;
+      resp.auth = null;
+      resp.mess = 'Please enter email and password';
       response.send(resp);
+  }
+  password = crypto.createHash('md5').update(request.body.password).digest('hex');
+  if (emailregex(email)) {
+  Account.findOne({email: email, password: password}, function(err, found) {
+    if (isEmptyObject(found)) {
+      resp.id = null;
+      resp.auth = null;
+      resp.mess = 'Email or password is incorrect';
+      console.log(resp)
+      response.send(resp);
+      return;
     } else {
       console.log('Success')
       resp.id = found._id;
@@ -172,17 +213,18 @@ app.post('/login', function(request, response) {
       response.send(resp);
     }
     })
-    } else if (account.email == null || account.password == null) {
-      resp.mess = 'Please enter email and password';
+    }  else {
+      resp.id = null;
+      resp.auth = null;
+      resp.mess = 'Invalid Email or password';
       response.send(resp);
-    } else {
-    resp.mess = 'Invalid Email';
-    response.send(resp);
+      return;
   }
 })
 
+//Add Phone
 app.post('/phone', function(request, response) {
-    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   var phone = new Phone();
   phone.title = request.body.name;
   phone.accountID = request.body.accountID;
@@ -200,8 +242,9 @@ app.post('/phone', function(request, response) {
   });
 });
 
+//Set main phone
 app.post('/main-phone', function(request, response) {
-    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   Account.updateOne({_id:request.body.accountID}, {main_phone: request.body.phoneID}, function(err, account) {
     if (err) {
       response.send(err)
@@ -211,6 +254,7 @@ app.post('/main-phone', function(request, response) {
   })
 })
 
+//Set Status
 app.post('/location', function(request, response) {
     console.log('here');
     if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
@@ -234,7 +278,7 @@ app.post('/location', function(request, response) {
   });
 })
 
-
+//Get coordinates
 app.post('/coordinates', async function(request, response) {
     if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
     var coords = [];
@@ -266,6 +310,7 @@ app.post('/coordinates', async function(request, response) {
    })
 })
 
+//Request Access
 app.post('/requestaccess', async function(request, response) {
     if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   if (request.body.phoneID == null) {
@@ -316,6 +361,7 @@ app.post('/requestaccess', async function(request, response) {
 
 })
 
+//Request Update
 app.post('/requestupdate', async function(request, response) {
     if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
     Account.findOne({main_phone: request.body.phoneID}, function(err, account) {
@@ -349,7 +395,7 @@ app.post('/requestupdate', async function(request, response) {
 })
 
 app.post('/access', function(request, response) {
-    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+  if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   Account.updateOne({main_phone: request.body.main_phone}, {$addToSet:{requested_phones: request.body.accountID}}, function(err, account) {
     if (err) {
       response.send(err)
@@ -359,7 +405,7 @@ app.post('/access', function(request, response) {
   })
 });
 
-
+//Enable access
 app.post('/enable', async function(request, response) {
   if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
   console.log(request.body)
@@ -373,7 +419,9 @@ app.post('/enable', async function(request, response) {
   })
 });
 
+//Reset Password and send email
 app.post('/resetpass', async function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
@@ -394,7 +442,7 @@ app.post('/resetpass', async function(request, response) {
 
             let mailOptions = {
                 from: '"Watcher" <info@r3tr0.tech>',
-                to: "smuazali1998@gmail.com",
+                to: request.body.email,
                 subject: "Reset Password",
                 text: "Your Watcher password has been set to "+text
             };
@@ -405,6 +453,74 @@ app.post('/resetpass', async function(request, response) {
 
     })
 
+
+});
+
+//Reset Password
+app.post('/resetpass', async function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 10; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    hash = crypto.createHash('md5').update(text).digest('hex');
+    Account.updateOne({email:request.body.email}, {password: hash},async function(err, account) {
+        let transporter = nodemailer.createTransport({
+            host: "smtp.sendgrid.net",
+            port: 465,
+            secure: true,
+            auth: {
+                user: 'r3tr0tech',
+                pass: 'gonnachange1'
+            }
+        });
+
+        let mailOptions = {
+            from: '"Watcher" <info@r3tr0.tech>',
+            to: request.body.email,
+            subject: "Reset Password",
+            text: "Your Watcher password has been set to "+text
+        };
+
+        let info = await transporter.sendMail(mailOptions)
+
+        console.log("Message sent: %s");
+
+    })
+
+
+});
+
+//Change Password
+app.post('/changepass', async function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+    var resp = {};
+    var password = request.body.password;
+    var current = request.body.current;
+    if (current == null || password == null) {
+        resp.mess = "Current or New password can not be empty";
+        response.send(resp);
+        return;
+    } else if (current == password) {
+        resp.mess = "Current & New password can not be same";
+        response.send(resp);
+        return;
+    }
+    hash = crypto.createHash('md5').update(current).digest('hex');
+    Account.findOne({_id: request.body.id, password: hash}, function(err, found) {
+        if (isEmptyObject(found)) {
+            resp.mess = 'Your current password is incorrect';
+            response.send(resp);
+        } else {
+            hash = crypto.createHash('md5').update(password).digest('hex');
+            Account.updateOne({_id:request.body.id}, {password: hash},async function(err, account) {
+                resp.mess = 'Your password has been changed';
+                response.send(resp);
+            })
+        }
+    })
 
 });
 

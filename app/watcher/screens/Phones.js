@@ -10,12 +10,17 @@ import {
 import { Permissions, Notifications } from 'expo';
 import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle, List, ListItem, Thumbnail } from 'native-base';
 import { connect } from 'react-redux';
+import { showMessage, hideMessage } from "react-native-flash-message";
 const EXPO_UPDATE = 'http://192.168.0.106:5000/requestupdate';
 const PUSH_ENDPOINT = 'http://192.168.0.106:5000/phones';
 class PhonesScreen extends Component {
 
 
     getPhones() {
+        showMessage({
+            message: 'Loading Phones',
+            type: "info",
+        });
        fetch(PUSH_ENDPOINT, {
        method: 'POST',
        headers: {
@@ -30,7 +35,10 @@ class PhonesScreen extends Component {
      }).then(response => response.json())
      .then(json => {
        this.setState({phones: json})
-         console.log(this.state, 'PHONE SCREEEEEEEN')
+         showMessage({
+             message: 'Loading Complete',
+             type: "info",
+         });
      })
 
    }

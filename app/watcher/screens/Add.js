@@ -11,6 +11,7 @@ import {
 import { Permissions, Notifications } from 'expo';
 import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle, List, ListItem, Thumbnail } from 'native-base';
 import { connect } from 'react-redux';
+import {showMessage} from "react-native-flash-message";
 const PUSH_ENDPOINT = 'http://192.168.0.106:5000/push';
 const REQUEST_ENDPOINT = 'http://192.168.0.106:5000/access';
 const REQUEST_ACCESS_URL = 'http://192.168.0.106:5000/requestaccess';
@@ -52,7 +53,11 @@ class AddScreen extends Component {
     }
 
     async requestedPhones() {
-      this.setState({loading: 'Loading...'})
+      this.setState({loading: 'Loading requests'})
+        showMessage({
+            message: this.state.loading,
+            type: "info",
+        })
       fetch(REQUESTED_PHONES_URL, {
       method: 'POST',
       headers: {
@@ -67,7 +72,11 @@ class AddScreen extends Component {
     }).then(response => response.json())
     .then(json => {
       this.setState({list : json})
-      this.setState({loading: null})
+      this.setState({loading: 'Loading complete'})
+        showMessage({
+            message: this.state.loading,
+            type: "info",
+        })
     })
     }
 
@@ -134,7 +143,6 @@ class AddScreen extends Component {
         <Text>Pending Requests</Text>
         </Item>
             <View>
-            <Text>{this.state.loading}</Text>
             </View>
           <List>
             {

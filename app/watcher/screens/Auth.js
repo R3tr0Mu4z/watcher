@@ -10,6 +10,7 @@ import {
 import { Container, Header, Content, Item, Input, Button, Text } from 'native-base';
 import Expo from 'expo';
 import { connect } from 'react-redux';
+import { showMessage, hideMessage } from "react-native-flash-message";
 const SIGNUP_URL = 'http://192.168.0.106:5000/registration';
 const LOGIN_URL = 'http://192.168.0.106:5000/login';
 var key = "gonnachangethislater";
@@ -51,10 +52,14 @@ class AuthScreen extends React.Component {
     this.setState({mess : json.mess})
     var auth = json.id;
     this.props.signup(auth);
+      showMessage({
+          message: this.state.mess,
+          type: "info",
+      })
     if (json.id !== null) {
       this.props.navigation.navigate('Phone')
     }
-    console.log(this.state)
+
   })
   }
   login = () => {
@@ -75,7 +80,16 @@ class AuthScreen extends React.Component {
     this.setState({accountID : json.id})
     this.setState({auth : json.auth})
     this.setState({mess : json.mess})
-    console.log(this.state, 'login state')
+    var auth = json.id;
+      showMessage({
+          message: this.state.mess,
+          type: "info",
+      });
+    this.props.signup(auth);
+    if (json.id !== null) {
+        this.props.navigation.navigate('Phone')
+    }
+
   })
   }
   authorized = () => {
@@ -108,7 +122,6 @@ class AuthScreen extends React.Component {
                   placeholder='Password     '
                   onChangeText={(password) => this.setState({password})}/>
             </Item>
-              <Text>{this.state.mess}</Text>
                 <View style={styles.Buttonstyle}>
               <Button
                   onPress={() => this.signup()}
@@ -137,7 +150,6 @@ class AuthScreen extends React.Component {
                         placeholder='Password     '
                         onChangeText={(password) => this.setState({password})}/>
                 </Item>
-                  <Text>{this.state.mess}</Text>
                 <View style={styles.Buttonstyle}>
                   <Button
                       onPress={() => this.login()}

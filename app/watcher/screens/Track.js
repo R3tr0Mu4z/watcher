@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle } from 'native-base';
 import { Permissions, Notifications } from 'expo';
+import { showMessage, hideMessage } from "react-native-flash-message";
 import { connect } from 'react-redux';
 const PUSH_ENDPOINT = 'http://192.168.0.106:5000/push';
 const REQUEST_ENDPOINT = 'http://192.168.0.106:5000/access';
@@ -74,7 +75,10 @@ class TrackScreen extends Component {
         header: null
     }
     async getLocation() {
-      this.setState({form: 'Updating'});
+        showMessage({
+            message: 'Updating',
+            type: "info",
+        });
       navigator.geolocation.getCurrentPosition(
        (position) => {
          console.log(position);
@@ -110,7 +114,10 @@ class TrackScreen extends Component {
     }).then(response => response.json())
     .then(json => {
       console.log(json)
-      this.setState({form: 'Updated'})
+        showMessage({
+            message: 'Updated',
+            type: "info",
+        })
     })
     }
 
@@ -135,7 +142,7 @@ class TrackScreen extends Component {
                     placeholder='Type Your Status'
                     onChangeText={(status) => this.setState({status})}/>
             </Item>
-                <Text>{this.state.form}</Text>
+
 
                 <View style={styles.Buttonstyle}>
                     <Button

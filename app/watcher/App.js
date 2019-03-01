@@ -6,12 +6,14 @@ import MainScreen from './screens/Main';
 import TrackScreen from './screens/Track';
 import MapScreen from './screens/Map';
 import AddScreen from './screens/Add';
+import SettingScreen from './screens/Setting';
 import PhonesScreen from './screens/Phones.js';
 import { createStore } from 'redux';
 import { persistStore, persistReducer } from 'redux-persist'
 import { Provider } from 'react-redux';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation'
 import storage from 'redux-persist/lib/storage'
+import FlashMessage from "react-native-flash-message";
 
 const initialState = {
   email: '',
@@ -53,6 +55,7 @@ class App extends React.Component {
     return (
       <Provider store={store}>
           <AppStackNavigator />
+          <FlashMessage position="bottom" />
       </Provider>
     );
   }
@@ -66,7 +69,8 @@ const AppStackNavigator = createStackNavigator({
     screen: createBottomTabNavigator({
       Track: TrackScreen,
       Phones: PhonesScreen,
-      Request: AddScreen
+      Request: AddScreen,
+      Settings: SettingScreen
     })
   }
 },
