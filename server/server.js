@@ -468,12 +468,12 @@ app.post('/resetpass', async function(request, response) {
     hash = crypto.createHash('md5').update(text).digest('hex');
     Account.updateOne({email:request.body.email}, {password: hash},async function(err, account) {
         let transporter = nodemailer.createTransport({
-            host: "smtp.sendgrid.net",
+            host: "*****",
             port: 465,
             secure: true,
             auth: {
-                user: 'r3tr0tech',
-                pass: 'gonnachange1'
+                user: '*****',
+                pass: '*****'
             }
         });
 
