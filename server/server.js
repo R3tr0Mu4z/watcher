@@ -451,8 +451,49 @@ app.post('/reset', async function(request, response) {
             response.send(res);
             console.log("Message sent: %s"+request.body.email);
 
+<<<<<<< HEAD
         })
     }
+=======
+            console.log("Message sent: %s");
+
+    })
+
+
+});
+
+//Reset Password
+app.post('/resetpass', async function(request, response) {
+    if (!checkckey(request.body.secretkey, key)) { console.log('incorrect key ' +request.body.secretkey); return};
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+    for (var i = 0; i < 10; i++)
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    hash = crypto.createHash('md5').update(text).digest('hex');
+    Account.updateOne({email:request.body.email}, {password: hash},async function(err, account) {
+        let transporter = nodemailer.createTransport({
+            host: "*****",
+            port: 465,
+            secure: true,
+            auth: {
+                user: '*****',
+                pass: '*****'
+            }
+        });
+
+        let mailOptions = {
+            from: '"Watcher" <info@r3tr0.tech>',
+            to: request.body.email,
+            subject: "Reset Password",
+            text: "Your Watcher password has been set to "+text
+        };
+
+        let info = await transporter.sendMail(mailOptions)
+
+        console.log("Message sent: %s");
+>>>>>>> c37a53f7075761f96b87ffe432cb337f4e2270fe
 
 
 
