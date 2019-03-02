@@ -3,8 +3,6 @@
 ![Image](https://lh3.googleusercontent.com/RahNc4gdM60EUy71Zb1l-txPZFn-gbbiNKM9kvAf27H33hiQiIsWfPZxU4tuS6SINg=w1600-h804-rw)
 ![Image](https://lh3.googleusercontent.com/0tJXRO5cXB0YMKUMJf8yjXUwHSEIFKBWxSCGxSBH1ceUD80uLWaLNFq-SMC0EJ3BBfoE=w1600-h804-rw)
 
-Source code of app : https://play.google.com/store/apps/details?id=tech.r3tr0.watcher
-
 Check /app directory for codes of the app
 
 Check /server directory for codes of the server
