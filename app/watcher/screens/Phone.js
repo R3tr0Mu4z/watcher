@@ -6,12 +6,13 @@ import {
     StyleSheet,
     TouchableOpacity,
     View,
+    BackHandler
 } from 'react-native';
 import { Container, Header, Content, Item, Input, Button, Text } from 'native-base';
 import { WebBrowser } from 'expo';
 import { connect } from 'react-redux';
-const PHONE_URL = 'http://192.168.0.106:5000/phone'
-const MAIN_PHONE_URL = 'http://192.168.0.106:5000/main-phone'
+const PHONE_URL = 'https://host/phone'
+const MAIN_PHONE_URL = 'https://host/main-phone'
 class PhoneScreen extends Component {
     constructor() {
       super();
@@ -34,7 +35,7 @@ class PhoneScreen extends Component {
       body: JSON.stringify({
         accountID : this.props.accountID,
         name : this.state.phonename,
-        secretkey: "gonnachangethislater"
+        secretkey: "****************"
       })
 
     }).then(response => response.json())
@@ -55,7 +56,7 @@ class PhoneScreen extends Component {
         body: JSON.stringify({
           accountID : this.props.accountID,
           phoneID : this.props.phoneID,
-          secretkey: "gonnachangethislater"
+          secretkey: "****************"
         })
 
       }).then(response => response.json())
@@ -69,6 +70,14 @@ class PhoneScreen extends Component {
     hasphone = () => {
       this.props.navigation.navigate('Main');
     }
+
+    componentWillMount() {
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
+    }
+
+    handleBackButton = () => {
+        BackHandler.exitApp();
+    };
 
     render() {
 

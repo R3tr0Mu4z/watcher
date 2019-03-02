@@ -7,11 +7,12 @@ import {
   Text,
   TouchableOpacity,
   View,
+   BackHandler
 } from "react-native";
 import { MapView } from 'expo';
 import { Button, FormLabel, FormInput, FormValidationMessage } from 'react-native-elements';
 import { connect } from 'react-redux';
-const COORDINATES_URL = 'http://192.168.0.106:5000/coordinates';
+const COORDINATES_URL = 'https://host/coordinates';
 const pin = require('../assets/pin.png');
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -230,7 +231,7 @@ class MapScreen extends Component {
       },
       body: JSON.stringify({
           phoneid: mapphone,
-          secretkey: "gonnachangethislater"
+          secretkey: "****************"
       })
     }).then(response => response.json())
     .then(json => {
@@ -244,12 +245,16 @@ class MapScreen extends Component {
       this.getCoordinates()
     }
     componentWillMount() {
-    const { navigation } = this.props;
-    const mapphone = navigation.getParam('mapphone', 'NO-ID');
-    console.log(mapphone, 'MAP PHN')
-    this.setState({mapID: mapphone});
-      this.getCoordinates(mapphone);
+        const { navigation } = this.props;
+        const mapphone = navigation.getParam('mapphone', 'NO-ID');
+        console.log(mapphone, 'MAP PHN')
+        this.setState({mapID: mapphone});
+        this.getCoordinates(mapphone);
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
     }
+    handleBackButton = () => {
+        BackHandler.exitApp();
+    };
 
     render() {
 

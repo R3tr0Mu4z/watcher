@@ -6,16 +6,17 @@ import {
     StyleSheet,
     TouchableOpacity,
     View,
+    BackHandler,
+    Keyboard
 } from 'react-native';
 import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle } from 'native-base';
 import { showMessage, hideMessage } from "react-native-flash-message";
-const CHANGE_URL = 'http://192.168.0.106:5000/changepass';
+const CHANGE_URL = 'https://host/changepass';
 import { connect } from 'react-redux';
 class SettingScreen extends Component {
 
-
-
     async changePass() {
+        Keyboard.dismiss()
         fetch(CHANGE_URL, {
             method: 'POST',
             headers: {
@@ -26,7 +27,7 @@ class SettingScreen extends Component {
                 id: this.props.accountID,
                 current: this.state.current,
                 password: this.state.password,
-                secretkey: "gonnachangethislater"
+                secretkey: "****************"
             })
 
         }).then(response => response.json())
@@ -38,8 +39,11 @@ class SettingScreen extends Component {
             })
     }
     componentWillMount() {
-        console.log(this.props);
+        BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
     }
+    handleBackButton = () => {
+        BackHandler.exitApp();
+    };
 
 
     constructor() {
@@ -65,9 +69,7 @@ class SettingScreen extends Component {
                     <Left>
                         <Title>Settings</Title>
                     </Left>
-                    <Body>
 
-                    </Body>
                     <Right />
                 </Header>
                 <Content style={styles.formarea}>
@@ -127,7 +129,8 @@ const styles = StyleSheet.create({
         paddingTop: 10
     },
     headr: {
-        backgroundColor: '#000'
+        backgroundColor: '#000',
+        paddingTop: 20
     },
 });
 

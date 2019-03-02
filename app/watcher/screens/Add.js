@@ -1,22 +1,40 @@
 import React, { Component } from "react";
 import {
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-  Alert
+    Image,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
+    Alert,
+    BackHandler, Keyboard
 } from "react-native";
 import { Permissions, Notifications } from 'expo';
-import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle, List, ListItem, Thumbnail } from 'native-base';
+import {
+    Container,
+    Header,
+    Content,
+    Item,
+    Input,
+    Button,
+    Text,
+    Left,
+    Body,
+    Right,
+    Title,
+    Subtitle,
+    List,
+    ListItem,
+    Thumbnail,
+    Icon
+} from 'native-base';
 import { connect } from 'react-redux';
 import {showMessage} from "react-native-flash-message";
-const PUSH_ENDPOINT = 'http://192.168.0.106:5000/push';
-const REQUEST_ENDPOINT = 'http://192.168.0.106:5000/access';
-const REQUEST_ACCESS_URL = 'http://192.168.0.106:5000/requestaccess';
-const REQUESTED_PHONES_URL = 'http://192.168.0.106:5000/requested-phones';
-const ENABLE_ENDPOINT = 'http://192.168.0.106:5000/enable';
+const PUSH_ENDPOINT = 'https://host/push';
+const REQUEST_ENDPOINT = 'https://host/access';
+const REQUEST_ACCESS_URL = 'https://host/requestaccess';
+const REQUESTED_PHONES_URL = 'https://host/requested-phones';
+const ENABLE_ENDPOINT = 'https://host/enable';
 const timeoutPromise = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
 
 class AddScreen extends Component {
@@ -34,6 +52,7 @@ class AddScreen extends Component {
     }
 
      requestPhone() {
+      Keyboard.dismiss()
       fetch(REQUEST_ACCESS_URL, {
       method: 'POST',
       headers: {
@@ -43,12 +62,16 @@ class AddScreen extends Component {
       body: JSON.stringify({
           phoneID: this.state.req,
           accountID : this.props.accountID,
-          secretkey: "gonnachangethislater"
+          secretkey: "****************"
       })
 
     }).then(response => response.json())
     .then(json => {
         this.setState({req: json.stat})
+        showMessage({
+            message: json.stat,
+            type: "info",
+        })
     })
     }
 
@@ -66,7 +89,7 @@ class AddScreen extends Component {
       },
       body: JSON.stringify({
           accountID : this.props.accountID,
-          secretkey: "gonnachangethislater"
+          secretkey: "****************"
       })
 
     }).then(response => response.json())
@@ -91,7 +114,7 @@ class AddScreen extends Component {
         recaccountID: id,
         senaccountID: this.props.accountID,
         phoneID: this.props.phoneID,
-        secretkey: "gonnachangethislater"
+        secretkey: "****************"
       })
 
     }).then(response => response.json())
@@ -103,7 +126,11 @@ class AddScreen extends Component {
 
     componentWillMount() {
       this.requestedPhones();
+      BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
     }
+    handleBackButton = () => {
+        BackHandler.exitApp();
+    };
     render() {
 
         return (
@@ -112,10 +139,13 @@ class AddScreen extends Component {
                     <Left>
                         <Title>Request</Title>
                     </Left>
-                    <Body>
 
-                    </Body>
-                    <Right />
+                    <Right>
+                        <Button transparent
+                                onPress={() => this.requestedPhones()}>
+                            <Icon name='refresh' />
+                        </Button>
+                    </Right>
                 </Header>
                 <Content style={styles.formarea}>
                 <Item>
@@ -133,14 +163,13 @@ class AddScreen extends Component {
 
             </View>
             <View>
-                <Text>{this.state.req}</Text>
             </View>
             <View>
                 <Text>Your Phone ID : {this.props.phoneID}</Text>
             </View>
 
         <Item>
-        <Text>Pending Requests</Text>
+        <Text style={{paddingTop: 20}}>Pending Requests</Text>
         </Item>
             <View>
             </View>
@@ -191,13 +220,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'stretch',
-        paddingTop: 10
+        paddingTop: 10,
+        paddingBottom: 20
     },
     formarea: {
         paddingTop: 10
     },
     headr: {
-        backgroundColor: '#000'
+        backgroundColor: '#000',
+        paddingTop: 20
     },
 });
 

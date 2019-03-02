@@ -14,7 +14,7 @@ import { Provider } from 'react-redux';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation'
 import storage from 'redux-persist/lib/storage'
 import FlashMessage from "react-native-flash-message";
-
+import Ionicons from 'react-native-vector-icons/Ionicons';
 const initialState = {
   email: '',
   password: '',
@@ -67,11 +67,50 @@ const AppStackNavigator = createStackNavigator({
   Map: MapScreen,
   Main: {
     screen: createBottomTabNavigator({
-      Track: TrackScreen,
-      Phones: PhonesScreen,
-      Request: AddScreen,
-      Settings: SettingScreen
-    })
+      Status: {
+          screen: TrackScreen,
+          navigationOptions: {
+              tabBarIcon: ({ focused, tintColor }) => {
+                  const iconName = `ios-compass`;
+                  return <Ionicons name={iconName} size={25} color={tintColor} />;
+              },
+          },
+      },
+      Phones: {
+          screen: PhonesScreen,
+          navigationOptions: {
+              tabBarIcon: ({ focused, tintColor }) => {
+                  const iconName = `ios-phone-portrait`;
+                  return <Ionicons name={iconName} size={25} color={tintColor} />;
+              },
+          },
+      },
+      Request: {
+          screen: AddScreen,
+          navigationOptions: {
+              tabBarIcon: ({ focused, tintColor }) => {
+                  const iconName = `ios-add-circle-outline`;
+                  return <Ionicons name={iconName} size={25} color={tintColor} />;
+              },
+          },
+      },
+      Settings: {
+          screen: SettingScreen,
+          navigationOptions: {
+              tabBarIcon: ({ focused, tintColor }) => {
+                  const iconName = `ios-settings`;
+                  return <Ionicons name={iconName} size={25} color={tintColor} />;
+              },
+          },
+      },
+    },
+        {
+            tabBarOptions: {
+                activeTintColor: 'black',
+                inactiveTintColor: 'gray',
+            },
+        }
+    )
   }
 },
 {

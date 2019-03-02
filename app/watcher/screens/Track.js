@@ -6,14 +6,30 @@ import {
     StyleSheet,
     TouchableOpacity,
     View,
+    BackHandler,
+    Keyboard
 } from 'react-native';
-import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle } from 'native-base';
+import {
+    Container,
+    Header,
+    Content,
+    Item,
+    Input,
+    Button,
+    Text,
+    Left,
+    Body,
+    Right,
+    Title,
+    Subtitle,
+    Icon
+} from 'native-base';
 import { Permissions, Notifications } from 'expo';
 import { showMessage, hideMessage } from "react-native-flash-message";
 import { connect } from 'react-redux';
-const PUSH_ENDPOINT = 'http://192.168.0.106:5000/push';
-const REQUEST_ENDPOINT = 'http://192.168.0.106:5000/access';
-const LOCATION_ENDPOINT = 'http://192.168.0.106:5000/location';
+const PUSH_ENDPOINT = 'https://host/push';
+const REQUEST_ENDPOINT = 'https://host/access';
+const LOCATION_ENDPOINT = 'https://host/location';
 class TrackScreen extends Component {
 
   async getToken(){
@@ -38,7 +54,7 @@ class TrackScreen extends Component {
     body: JSON.stringify({
       accountID: this.props.accountID,
       token: value,
-      secretkey: "gonnachangethislater"
+      secretkey: "****************"
     })
 
   })
@@ -47,7 +63,15 @@ class TrackScreen extends Component {
   componentDidMount() {
     this.getToken();
     this._notificationSubscription = Notifications.addListener(this._handleNotification);
+     BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
   }
+    handleBackButton = () => {
+        BackHandler.exitApp();
+    };
+
+    handleBackButton = () => {
+        BackHandler.exitApp();
+    };
   _handleNotification = (notification) => {
     console.log(notification.data.request, 'notification data type')
     if (notification.data.request == "REQUEST_PHONE") {
@@ -75,6 +99,7 @@ class TrackScreen extends Component {
         header: null
     }
     async getLocation() {
+        Keyboard.dismiss()
         showMessage({
             message: 'Updating',
             type: "info",
@@ -109,7 +134,7 @@ class TrackScreen extends Component {
         speed :this.state.speed,
         timestamp : this.state.timestamp,
         status : this.state.status,
-        secretkey: "gonnachangethislater"
+        secretkey: "****************"
       })
     }).then(response => response.json())
     .then(json => {
@@ -130,9 +155,7 @@ class TrackScreen extends Component {
                     <Left>
                         <Title>Status</Title>
                     </Left>
-                    <Body>
 
-                    </Body>
                     <Right />
                 </Header>
                 <Content style={styles.formarea}>
@@ -186,7 +209,8 @@ const styles = StyleSheet.create({
         paddingTop: 10
     },
     headr: {
-        backgroundColor: '#000'
+        backgroundColor: '#000',
+        paddingTop: 20
     },
 });
 

@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Watcher - Desktop to Android/iOS Phone Tracker",
+    "name": "Watcher - Location Status",
     "slug": "watcher",
     "privacy": "public",
     "sdkVersion": "31.0.0",
@@ -13,11 +13,12 @@
     },
     "android": {
       "package": "tech.r3tr0.watcher",
+      "permissions": [],
       "config": {
-        "googleMaps": { "apiKey": "AIzaSyCtQ0ZNYHhmXDHmJooYSUOzxxRad7TUPRg" }
-      }
+        "googleMaps": { "apiKey": "AIzaSyBlSPbMmKUjkCcX14tkInjzFMq7kD5RvpE" }
+      },
     },
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "splash": {

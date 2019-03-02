@@ -5,14 +5,15 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  Alert
+  Alert,
+  BackHandler
 } from "react-native";
 import { Permissions, Notifications } from 'expo';
-import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle, List, ListItem, Thumbnail } from 'native-base';
+import { Container, Header, Content, Item, Input, Button, Text, Left, Body, Right, Title, Subtitle, Icon, List, ListItem, Thumbnail } from 'native-base';
 import { connect } from 'react-redux';
 import { showMessage, hideMessage } from "react-native-flash-message";
-const EXPO_UPDATE = 'http://192.168.0.106:5000/requestupdate';
-const PUSH_ENDPOINT = 'http://192.168.0.106:5000/phones';
+const EXPO_UPDATE = 'https://host/requestupdate';
+const PUSH_ENDPOINT = 'https://host/phones';
 class PhonesScreen extends Component {
 
 
@@ -29,7 +30,7 @@ class PhonesScreen extends Component {
        },
        body: JSON.stringify({
            ID: this.props.accountID,
-           secretkey: "gonnachangethislater"
+           secretkey: "****************"
        })
 
      }).then(response => response.json())
@@ -54,7 +55,7 @@ class PhonesScreen extends Component {
                    request: "REQUEST_UPDATE",
                    phoneID: id,
                    sphoneID: this.props.phoneID,
-                   secretkey: "gonnachangethislater"
+                   secretkey: "****************"
 
            })
 
@@ -65,8 +66,12 @@ class PhonesScreen extends Component {
 
   componentWillMount() {
     this.getPhones();
+      BackHandler.addEventListener('hardwareBackPress', this.handleBackButton);
   }
 
+    handleBackButton = () => {
+        BackHandler.exitApp();
+    };
 
     constructor() {
       super();
@@ -95,10 +100,13 @@ class PhonesScreen extends Component {
                 <Left>
                     <Title>Phones</Title>
                 </Left>
-                <Body>
 
-                </Body>
-                <Right />
+                <Right>
+                    <Button transparent
+                    onPress={() => this.getPhones()}>
+                        <Icon name='refresh' />
+                    </Button>
+                </Right>
             </Header>
             <Content>
                 <List>
@@ -162,7 +170,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
     headr: {
-        backgroundColor: '#000'
+        backgroundColor: '#000',
+        paddingTop: 20
     },
 });
 
