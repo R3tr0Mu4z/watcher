@@ -451,10 +451,8 @@ app.post('/reset', async function(request, response) {
             response.send(res);
             console.log("Message sent: %s"+request.body.email);
 
-<<<<<<< HEAD
         })
     }
-=======
             console.log("Message sent: %s");
 
     })
@@ -493,7 +491,7 @@ app.post('/resetpass', async function(request, response) {
         let info = await transporter.sendMail(mailOptions)
 
         console.log("Message sent: %s");
->>>>>>> c37a53f7075761f96b87ffe432cb337f4e2270fe
+
 
 
 
